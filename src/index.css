@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Simple marquee for offer messages above the header */
+.marquee {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-content {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee 18s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Global typography tweaks: ensure consistent hierarchy */
+@layer base {
+  h1 {
+    @apply text-4xl font-bold leading-tight text-gray-900;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold text-gray-900;
+  }
+
+  p {
+    @apply text-base text-gray-800;
+  }
+}
+
+/* Interactive hover utilities for buttons/cards/images */
+@layer components {
+  .btn-interactive {
+    @apply transform transition duration-200 ease-out;
+  }
+  .btn-interactive:hover {
+    @apply -translate-y-1 shadow-lg;
+    filter: brightness(0.95);
+  }
+
+  .card-interactive {
+    @apply transform transition duration-200 ease-out;
+  }
+  .card-interactive:hover {
+    @apply -translate-y-1 shadow-xl;
+  }
+
+  .image-zoom {
+    @apply transition-transform duration-300 ease-out;
+  }
+  .card-interactive:hover .image-zoom {
+    transform: scale(1.04);
+  }
+
+  /* Mobile-specific touch improvements */
+  @media (max-width: 768px) {
+    .btn-interactive {
+      @apply active:scale-95;
+      min-height: 44px; /* iOS touch target minimum */
+    }
+
+    .card-interactive {
+      @apply active:scale-95;
+    }
+
+    /* Ensure minimum touch targets */
+    button, a, input, select, textarea {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Improve text readability on mobile */
+    body {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+  }
+
+  /* Skeleton placeholder for images */
+  .skeleton {
+    @apply bg-gray-200 rounded-md animate-pulse;
+  }
+
+  /* Heart pop animation for wishlist */
+  .heart-pop {
+    animation: heart-pop 360ms cubic-bezier(.2,.8,.2,1);
+    transform-origin: center;
+  }
+
+  @keyframes heart-pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+
+  /* Badge bump for count update */
+  .badge-bump {
+    animation: badge-bump 420ms cubic-bezier(.2,.8,.2,1);
+    transform-origin: center bottom;
+  }
+
+  @keyframes badge-bump {
+    0% { transform: translateY(0) scale(1); }
+    30% { transform: translateY(-6px) scale(1.15); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
+  /* WhatsApp floating button entry and pulse */
+  .whatsapp-entry {
+    animation: whatsapp-slide-up 360ms cubic-bezier(.2,.8,.2,1);
+  }
+
+  @keyframes whatsapp-slide-up {
+    0% { transform: translateY(10px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  .whatsapp-pulse {
+    animation: whatsapp-pulse 2200ms ease-in-out infinite;
+  }
+
+  @keyframes whatsapp-pulse {
+    0% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-2px) scale(1.02); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
+  /* 3D image viewer modal styles */
+  .image-3d-modal {
+    position: relative;
+    width: min(920px, 92vw);
+    height: min(640px, 74vh);
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.98));
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .image-3d-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+    will-change: transform;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+
+  .image-3d-inner img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    pointer-events: none;
+  }
+
+  /* subtle reflection / sheen */
+  .image-3d-inner::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(120deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.06) 35%, rgba(255,255,255,0) 60%);
+    mix-blend-mode: overlay;
+    transform: translateY(-10%) rotate(-12deg);
+    opacity: 0.9;
+  }
+
+  /* drop shadow under the image for depth */
+  .image-3d-inner::before {
+    content: '';
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 30px;
+    background: radial-gradient(closest-side, rgba(0,0,0,0.25), rgba(0,0,0,0.06));
+    filter: blur(18px);
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  /* Flamingo hover effect */
+  .flamingo-hover {
+    transition: all 0.3s ease;
+  }
+  .flamingo-hover:hover {
+    background: linear-gradient(135deg, #ff6b9d, #feca57);
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+  }
+}
