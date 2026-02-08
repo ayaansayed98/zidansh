@@ -94,3 +94,36 @@ export const clearAllStoredData = (): void => {
     console.error('Failed to clear stored data:', error);
   }
 };
+
+// Recently Viewed Items
+const RECENTLY_VIEWED_KEY = 'zidansh_recently_viewed';
+
+export interface RecentlyViewedItem {
+  id: number;
+  name: string;
+  image: string;
+  price: number;
+  viewedAt: number;
+}
+
+export const saveRecentlyViewed = (item: RecentlyViewedItem): void => {
+  try {
+    const existing = loadRecentlyViewed();
+    // Remove if already exists (to bump to top)
+    const filtered = existing.filter(i => i.id !== item.id);
+    // Add to front
+    const updated = [item, ...filtered].slice(0, 10); // Keep last 10
+    localStorage.setItem(RECENTLY_VIEWED_KEY, JSON.stringify(updated));
+  } catch (error) {
+    console.error('Failed to save recently viewed:', error);
+  }
+};
+
+export const loadRecentlyViewed = (): RecentlyViewedItem[] => {
+  try {
+    const stored = localStorage.getItem(RECENTLY_VIEWED_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    return [];
+  }
+};

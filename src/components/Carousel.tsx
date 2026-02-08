@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pause, Play, ShoppingBag, Star, Heart } from 'lucide-react';
+import { reviewsService } from '../lib/reviews';
 
 interface Slide {
   id: number;
@@ -24,17 +25,17 @@ interface CarouselProps {
 function Carousel({ addToFavorites, isFavorite, onProductSelect }: CarouselProps) {
   const slides: Slide[] = [
     {
-      id: 1, // Maps to product id 1
-      title: 'Yellow, Grey & White Printed Kurta Set',
+      id: 19, // Maps to product id 19
+      title: 'Cotton Long Kurti 3-Piece Set',
       subtitle: 'ZIDANSH COLLECTION',
-      description: 'Yellow, grey and white printed kurta with trousers. A-line 2 piece set perfect for everyday elegance.',
-      image: '/zidansh img/realimg/img1.jpg',
-      price: '₹699',
-      originalPrice: '₹1099',
-      badge: 'BEST SELLER',
-      rating: 4.5,
-      reviews: 1234,
-      features: ['A-line Cut', 'Comfort Fit', 'printed Design']
+      description: 'Step into effortless style and comfort with our gorgeous Plus-Size Cotton Long Kurti 3-Piece Suit Set. Pink and white floral pattern.',
+      image: '/zidansh img/realimg/img19.jpg',
+      price: '₹749',
+      originalPrice: '₹1299',
+      badge: 'PLUS SIZE',
+      rating: 4.7,
+      reviews: 1123,
+      features: ['Plus Size', 'Cotton Fabric', '3-Piece Set']
     },
     {
       id: 4, // Maps to product id 4
@@ -135,6 +136,26 @@ function Carousel({ addToFavorites, isFavorite, onProductSelect }: CarouselProps
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [reviewStats, setReviewStats] = useState<Record<number, { averageRating: number; totalReviews: number }>>({});
+
+  useEffect(() => {
+    const fetchReviewStats = async () => {
+      const stats = await reviewsService.getAllReviewsStats();
+      setReviewStats(stats);
+    };
+    fetchReviewStats();
+  }, []);
+
+  // Use stats for display if available, otherwise fallback to static data
+  const getSlideRating = (slideId: number, defaultRating: number = 0) => {
+    const stat = reviewStats[slideId];
+    return stat && stat.totalReviews > 0 ? stat.averageRating : defaultRating;
+  };
+
+  const getSlideReviews = (slideId: number, defaultReviews: number = 0) => {
+    const stat = reviewStats[slideId];
+    return stat && stat.totalReviews > 0 ? stat.totalReviews : defaultReviews;
+  };
 
   const prev = () => {
     if (isTransitioning) return;
@@ -227,18 +248,11 @@ function Carousel({ addToFavorites, isFavorite, onProductSelect }: CarouselProps
                 </div>
 
                 {/* Content Container */}
-                <div className="relative h-full flex items-center pb-6">
+                <div className="relative h-full flex items-center pb-8 sm:pb-12">
                   <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-16">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center">
                       {/* Left Content */}
                       <div className="space-y-3 sm:space-y-6 lg:space-y-8">
-                        {/* Badge */}
-                        {slide.badge && (
-                          <div className="inline-flex items-center bg-gradient-to-r from-rose-600 to-pink-600 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-bold tracking-wider shadow-lg animate-pulse ml-2 sm:ml-4">
-                            <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                            {slide.badge}
-                          </div>
-                        )}
 
                         {/* Title */}
                         <div className="space-y-1 sm:space-y-3">
@@ -251,27 +265,26 @@ function Carousel({ addToFavorites, isFavorite, onProductSelect }: CarouselProps
                         </div>
 
                         {/* Rating - Hidden on mobile, shown on larger screens */}
-                        {slide.rating && (
-                          <div className="hidden sm:flex items-center space-x-4">
-                            <div className="flex items-center space-x-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-4 h-4 sm:w-5 sm:h-5 ${i < Math.floor(slide.rating!)
-                                    ? 'text-yellow-400 fill-current'
-                                    : 'text-gray-400'
-                                    }`}
-                                />
-                              ))}
-                              <span className="ml-2 text-base sm:text-lg font-semibold text-white">
-                                {slide.rating}
-                              </span>
-                            </div>
-                            <span className="text-gray-200 text-sm sm:text-base">
-                              ({slide.reviews} reviews)
+                        <div className="hidden sm:flex items-center space-x-4">
+                          <div className="flex items-center space-x-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 sm:w-5 sm:h-5 ${i < Math.floor(getSlideRating(slide.id, slide.rating || 0))
+                                  ? 'text-yellow-400 fill-current'
+                                  : 'text-gray-400'
+                                  }`}
+                              />
+                            ))}
+                            <span className="ml-2 text-base sm:text-lg font-semibold text-white">
+                              {getSlideRating(slide.id, slide.rating || 0)}
                             </span>
                           </div>
-                        )}
+                          <span className="text-gray-200 text-sm sm:text-base">
+                            ({getSlideReviews(slide.id, slide.reviews || 0)} reviews)
+                          </span>
+                        </div>
+
 
                         {/* Description - Shorter on mobile */}
                         <p className="text-xs sm:text-base md:text-lg lg:text-xl text-white leading-relaxed max-w-2xl line-clamp-3 sm:line-clamp-none">
@@ -312,7 +325,7 @@ function Carousel({ addToFavorites, isFavorite, onProductSelect }: CarouselProps
                                   onProductSelect(slide.id);
                                 }
                               }}
-                              className="group bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 rounded-full font-bold text-sm sm:text-base lg:text-lg transition-all duration-200 transform hover:-translate-y-1 active:translate-y-[4px] shadow-[0_6px_0_#9f1239] hover:shadow-[0_8px_0_#881337] active:shadow-none flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto min-h-[40px] sm:min-h-[44px]"
+                              className="group bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 rounded-lg font-bold text-sm sm:text-base lg:text-lg transition-all duration-200 transform hover:-translate-y-1 active:translate-y-[4px] shadow-[0_6px_0_#9f1239] hover:shadow-[0_8px_0_#881337] active:shadow-none flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto min-h-[40px] sm:min-h-[44px]"
                             >
                               <ShoppingBag className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
                               <span className="text-xs sm:text-sm lg:text-base">Shop Now</span>
@@ -417,7 +430,7 @@ function Carousel({ addToFavorites, isFavorite, onProductSelect }: CarouselProps
 
         </div>
       </div>
-    </section>
+    </section >
   );
 }
 

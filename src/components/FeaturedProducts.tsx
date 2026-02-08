@@ -2,6 +2,7 @@ import { Star, Heart, X } from 'lucide-react';
 const fallbackImg = '/zidansh img/realimg/img1.jpg';
 import { useEffect, useState, useMemo } from 'react';
 import { analyticsService, generateSessionId } from '../lib/analytics';
+import { reviewsService } from '../lib/reviews';
 import { motion } from 'framer-motion';
 import { Product as ProductType } from '../types/product';
 
@@ -1284,6 +1285,101 @@ Occasion: Casual, Ethnic, Festive Wear`,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-12-01'),
   },
+  {
+    id: 30,
+    name: 'Deep purple A-line kurta set',
+
+    brand: 'Zidansh Premium',
+
+    description: `Deep Purple A-Line Kurta Set for Women | Cotton Blend | V-Neck with Embroidered Mirror Work | Three-Quarter Sleeves | Palazzo Trousers | Festive & Casual Wear
+
+Design: Solid deep purple kurta with vertical A-line flare (Ghera) and intricate silver embroidery with mirror/sequin work on the yoke
+
+Neckline: V-neck with detailed embroidery for a festive touch
+
+Fit: Flared A-line silhouette with three-quarter sleeves and optional side pockets adorned with mirror/sequin detailing
+
+Trousers: Matching wide-leg palazzo
+trousers in deep purple for a coordinated set
+
+Fabric: Soft, breathable cotton blend suitable for casual and festive wear
+
+Style: Elegant fusion look; perfect for daily wear, casual outings, or festive occasions
+
+Care: Gentle hand wash or machine wash recommended`,
+    cloth_type: 'A line 2 piece sets',
+    basePrice: 999,
+    baseOriginalPrice: 1665,
+    rating: 4.9,
+    reviews: 2890,
+    discount: 40,
+    images: ['img30.jpeg', 'img30.1.jpeg', 'img30.2.jpeg'],
+    attributes: [
+      {
+        id: 'attr_size',
+        name: 'Size', values: ['S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL']
+      }
+    ],
+    variations: [
+      { id: 'var_30_1', sku: 'PRD030-S', attributes: { Size: 'S' }, price: 999, originalPrice: 1665, stock: 22, lowStockThreshold: 5, isActive: true },
+      { id: 'var_30_2', sku: 'PRD030-M', attributes: { Size: 'M' }, price: 999, originalPrice: 1665, stock: 28, lowStockThreshold: 5, isActive: true },
+      { id: 'var_30_3', sku: 'PRD030-L', attributes: { Size: 'L' }, price: 999, originalPrice: 1665, stock: 20, lowStockThreshold: 5, isActive: true },
+      { id: 'var_30_4', sku: 'PRD030-XL', attributes: { Size: 'XL' }, price: 999, originalPrice: 1665, stock: 15, lowStockThreshold: 5, isActive: true },
+      { id: 'var_30_5', sku: 'PRD030-2XL', attributes: { Size: '2XL' }, price: 999, originalPrice: 1665, stock: 8, lowStockThreshold: 5, isActive: true },
+      { id: 'var_30_6', sku: 'PRD030-3XL', attributes: { Size: '3XL' }, price: 999, originalPrice: 1665, stock: 4, lowStockThreshold: 5, isActive: true },
+      { id: 'var_30_7', sku: 'PRD030-4XL', attributes: { Size: '4XL' }, price: 999, originalPrice: 1665, stock: 2, lowStockThreshold: 5, isActive: true },
+      { id: 'var_30_8', sku: 'PRD030-5XL', attributes: { Size: '5XL' }, price: 999, originalPrice: 1665, stock: 1, lowStockThreshold: 5, isActive: true }
+    ],
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-12-01'),
+  },
+  {
+    id: 31,
+    name: 'Dusty Rose A-Line Kurta Set',
+
+    brand: 'Zidansh Premium',
+
+    description: `Women’s Dusty Rose A-Line Kurta Set with Palazzo Trousers – Embroidered V-Neck, Three-Quarter Sleeves, Cotton Blend
+
+Elegant dusty rose/onion pink A-line kurta with flare
+
+V-neck with intricate embroidery and mirror/sequin detailing
+
+Three-quarter sleeves for a versatile, chic look
+
+Functional or decorative curved side pockets with mirror accents
+
+Matching wide-leg palazzo trousers included
+
+Comfortable cotton blend fabric, perfect for casual and festive wear
+
+Dupatta not included; styled with black flats`,
+    cloth_type: 'A line 2 piece sets',
+    basePrice: 999,
+    baseOriginalPrice: 1665,
+    rating: 4.9,
+    reviews: 2890,
+    discount: 40,
+    images: ['img31.jpeg', 'img31.1.jpeg', 'img31.4.jpeg'],
+    attributes: [
+      {
+        id: 'attr_size',
+        name: 'Size', values: ['S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL']
+      }
+    ],
+    variations: [
+      { id: 'var_31_1', sku: 'PRD031-S', attributes: { Size: 'S' }, price: 999, originalPrice: 1665, stock: 22, lowStockThreshold: 5, isActive: true },
+      { id: 'var_31_2', sku: 'PRD031-M', attributes: { Size: 'M' }, price: 999, originalPrice: 1665, stock: 28, lowStockThreshold: 5, isActive: true },
+      { id: 'var_31_3', sku: 'PRD031-L', attributes: { Size: 'L' }, price: 999, originalPrice: 1665, stock: 20, lowStockThreshold: 5, isActive: true },
+      { id: 'var_31_4', sku: 'PRD031-XL', attributes: { Size: 'XL' }, price: 999, originalPrice: 1665, stock: 15, lowStockThreshold: 5, isActive: true },
+      { id: 'var_31_5', sku: 'PRD031-2XL', attributes: { Size: '2XL' }, price: 999, originalPrice: 1665, stock: 8, lowStockThreshold: 5, isActive: true },
+      { id: 'var_31_6', sku: 'PRD031-3XL', attributes: { Size: '3XL' }, price: 999, originalPrice: 1665, stock: 4, lowStockThreshold: 5, isActive: true },
+      { id: 'var_31_7', sku: 'PRD031-4XL', attributes: { Size: '4XL' }, price: 999, originalPrice: 1665, stock: 2, lowStockThreshold: 5, isActive: true },
+      { id: 'var_31_8', sku: 'PRD031-5XL', attributes: { Size: '5XL' }, price: 999, originalPrice: 1665, stock: 1, lowStockThreshold: 5, isActive: true }
+    ],
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-12-01'),
+  },
 ];
 
 export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
@@ -1343,6 +1439,17 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
     };
 
     fetchInventory();
+  }, []);
+
+  // Fetch real-time review stats
+  const [reviewStats, setReviewStats] = useState<Record<number, { averageRating: number; totalReviews: number }>>({});
+
+  useEffect(() => {
+    const fetchReviewStats = async () => {
+      const stats = await reviewsService.getAllReviewsStats();
+      setReviewStats(stats);
+    };
+    fetchReviewStats();
   }, []);
 
   const baseUrl = import.meta.env.BASE_URL || '/';
@@ -1415,7 +1522,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
   };
 
   return (
-    <motion.section className="py-12 px-4 bg-primary-100" initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.12 }} variants={sectionVariants}>
+    <motion.section id="featured-products" className="py-12 px-4 bg-primary-100" initial="hidden" whileInView="show" viewport={{ once: true, amount: 0 }} variants={sectionVariants}>
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
           <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
@@ -1517,12 +1624,12 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
 
                   <div className="flex items-center space-x-2">
                     <div className="flex items-center">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <Star className={`h-4 w-4 ${reviewStats[product.id]?.totalReviews ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`} />
                       <span className="ml-1 text-sm font-semibold text-gray-700">
-                        {product.rating}
+                        {reviewStats[product.id]?.averageRating || 0}
                       </span>
                     </div>
-                    <span className="text-xs text-gray-500">({product.reviews})</span>
+                    <span className="text-xs text-gray-500">({reviewStats[product.id]?.totalReviews || 0} reviews)</span>
                   </div>
 
                   <div className="flex items-center space-x-2">

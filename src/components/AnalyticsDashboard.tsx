@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { analyticsService } from '../lib/analytics';
 import { CheckoutData } from '../types/analytics';
 import { TrendingUp, TrendingDown, Users, Monitor, Smartphone, Tablet, Tv, Globe, ShoppingCart, Package, DollarSign, MousePointer, Clock, BarChart3, Lock, Eye, EyeOff, RefreshCw, Eye as ViewIcon, LogOut } from 'lucide-react';
+import LoadingScreen from './LoadingScreen';
 
 interface MonthlyAudienceData {
   date: string;
@@ -88,11 +89,11 @@ const AnalyticsDashboard: React.FC = () => {
 
   useEffect(() => {
     // Check for existing authentication
-    const authStatus = localStorage.getItem('analytics_authenticated');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-      fetchAnalyticsData();
-    }
+    // const authStatus = localStorage.getItem('analytics_authenticated');
+    // if (authStatus === 'true') {
+    //   setIsAuthenticated(true);
+    //   fetchAnalyticsData();
+    // }
   }, []);
 
   // Auto-refresh data every 30 seconds when authenticated
@@ -267,23 +268,7 @@ const AnalyticsDashboard: React.FC = () => {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-64 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-white p-6 rounded-lg shadow">
-                  <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
-                  <div className="h-8 bg-gray-200 rounded w-32"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (error) {
@@ -467,7 +452,7 @@ const AnalyticsDashboard: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-baseline">
                 <span className="text-3xl font-bold text-gray-900">
-                  {monthlyAudience.length > 0 ?
+                  {monthlyAudience && monthlyAudience.length > 0 ?
                     (monthlyAudience[monthlyAudience.length - 1].audience / 1000).toFixed(1) :
                     '12.7'
                   }K
@@ -759,171 +744,187 @@ const AnalyticsDashboard: React.FC = () => {
 
             {/* Overall Peak Hour */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
-                <h3 className="text-lg font-semibold text-purple-900 mb-2">Overall Peak Hour</h3>
-                <div className="text-2xl font-bold text-purple-900">
-                  {peakEngagementAnalysis.overallPeakHour.timeRange}
+              {peakEngagementAnalysis.overallPeakHour && (
+                <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                  <h3 className="text-lg font-semibold text-purple-900 mb-2">Overall Peak Hour</h3>
+                  <div className="text-2xl font-bold text-purple-900">
+                    {peakEngagementAnalysis.overallPeakHour.timeRange}
+                  </div>
+                  <div className="text-sm text-purple-700 mt-1">
+                    {peakEngagementAnalysis.overallPeakHour.engagementPercentage}% of total engagement
+                  </div>
+                  <div className="flex justify-between text-xs text-purple-600 mt-2">
+                    <span>{peakEngagementAnalysis.overallPeakHour.clicks} clicks</span>
+                    <span>{peakEngagementAnalysis.overallPeakHour.pageViews} page views</span>
+                  </div>
                 </div>
-                <div className="text-sm text-purple-700 mt-1">
-                  {peakEngagementAnalysis.overallPeakHour.engagementPercentage}% of total engagement
-                </div>
-                <div className="flex justify-between text-xs text-purple-600 mt-2">
-                  <span>{peakEngagementAnalysis.overallPeakHour.clicks} clicks</span>
-                  <span>{peakEngagementAnalysis.overallPeakHour.pageViews} page views</span>
-                </div>
-              </div>
+              )}
 
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-                <h3 className="text-lg font-semibold text-blue-900 mb-2">Total Engagement</h3>
-                <div className="text-2xl font-bold text-blue-900">
-                  {peakEngagementAnalysis.totalMetrics.totalEngagement.toLocaleString()}
+              {peakEngagementAnalysis.totalMetrics && (
+                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                  <h3 className="text-lg font-semibold text-blue-900 mb-2">Total Engagement</h3>
+                  <div className="text-2xl font-bold text-blue-900">
+                    {peakEngagementAnalysis.totalMetrics.totalEngagement.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-blue-700 mt-1">
+                    Avg: {peakEngagementAnalysis.totalMetrics.averageHourlyEngagement.toFixed(1)}/hour
+                  </div>
+                  <div className="flex justify-between text-xs text-blue-600 mt-2">
+                    <span>{peakEngagementAnalysis.totalMetrics.totalClicks} total clicks</span>
+                    <span>{peakEngagementAnalysis.totalMetrics.totalPageViews} total page views</span>
+                  </div>
                 </div>
-                <div className="text-sm text-blue-700 mt-1">
-                  Avg: {peakEngagementAnalysis.totalMetrics.averageHourlyEngagement.toFixed(1)}/hour
-                </div>
-                <div className="flex justify-between text-xs text-blue-600 mt-2">
-                  <span>{peakEngagementAnalysis.totalMetrics.totalClicks} total clicks</span>
-                  <span>{peakEngagementAnalysis.totalMetrics.totalPageViews} total page views</span>
-                </div>
-              </div>
+              )}
 
               <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
                 <h3 className="text-lg font-semibold text-green-900 mb-2">Most Active Period</h3>
                 <div className="text-2xl font-bold text-green-900">
                   {(() => {
+                    if (!peakEngagementAnalysis?.periodAnalysis) return 'N/A';
                     const periods = Object.entries(peakEngagementAnalysis.periodAnalysis) as [string, { percentage: string }][];
+                    if (periods.length === 0) return 'N/A';
                     const topPeriod = periods.sort(([, a], [, b]) => parseFloat(b.percentage) - parseFloat(a.percentage))[0];
-                    return topPeriod[0].charAt(0).toUpperCase() + topPeriod[0].slice(1);
+                    return topPeriod && topPeriod[0] ? topPeriod[0].charAt(0).toUpperCase() + topPeriod[0].slice(1) : 'N/A';
                   })()}
                 </div>
                 <div className="text-sm text-green-700 mt-1">
                   {(() => {
+                    if (!peakEngagementAnalysis?.periodAnalysis) return '0% of engagement';
                     const periods = Object.entries(peakEngagementAnalysis.periodAnalysis) as [string, { percentage: string }][];
+                    if (periods.length === 0) return '0% of engagement';
                     const topPeriod = periods.sort(([, a], [, b]) => parseFloat(b.percentage) - parseFloat(a.percentage))[0];
-                    return topPeriod[1].percentage + '% of engagement';
+                    return (topPeriod && topPeriod[1]?.percentage ? topPeriod[1].percentage : '0') + '% of engagement';
                   })()}
                 </div>
               </div>
             </div>
 
             {/* Top 3 Peak Hours */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Top 3 Peak Hours</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {peakEngagementAnalysis.topPeakHours.map((hour: any, index: number) => (
-                  <div key={hour.hour} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-600">
-                        #{index + 1} Peak
-                      </span>
-                      <span className="text-lg font-bold text-gray-900">
-                        {hour.timeRange}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                      <div
-                        className="bg-purple-600 h-2 rounded-full"
-                        style={{ width: `${hour.engagementPercentage}%` }}
-                      />
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-600">
-                      <span>{hour.clicks} clicks</span>
-                      <span>{hour.pageViews} views</span>
-                      <span className="font-semibold">{hour.engagementPercentage}%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Period Analysis */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Engagement by Time Period</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Object.entries(peakEngagementAnalysis.periodAnalysis).map(([period, data]: [string, any]) => (
-                  <div key={period} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                    <div className="text-sm font-medium text-gray-600 capitalize mb-1">
-                      {period}
-                    </div>
-                    <div className="text-xl font-bold text-gray-900 mb-1">
-                      {data.percentage}%
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${data.percentage}%` }}
-                      />
-                    </div>
-                    <div className="text-xs text-gray-600 mt-1">
-                      {data.totalClicks} clicks, {data.totalPageViews} views
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Day of Week Analysis */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Engagement by Day of Week</h3>
-              <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
-                {peakEngagementAnalysis.dayOfWeekAnalysis.map((day: any) => (
-                  <div key={day.day} className="bg-gray-50 p-2 rounded-lg border border-gray-200 text-center">
-                    <div className="text-xs font-medium text-gray-600 mb-1">
-                      {day.day.slice(0, 3)}
-                    </div>
-                    <div className="text-lg font-bold text-gray-900 mb-1">
-                      {day.totalScore}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {day.clicks}c / {day.pageViews}v
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 24-Hour Engagement Chart */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">24-Hour Engagement Breakdown</h3>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="h-48 flex items-end space-x-1 px-2">
-                  {peakEngagementAnalysis.hourlyBreakdown.map((hour: any, index: number) => {
-                    const maxScore = Math.max(...peakEngagementAnalysis.hourlyBreakdown.map((h: any) => h.totalScore));
-                    const height = maxScore > 0 ? (hour.totalScore / maxScore) * 100 : 0;
-                    const isPeakHour = hour.hour === peakEngagementAnalysis.overallPeakHour.hour;
-
-                    return (
-                      <div
-                        key={hour.hour}
-                        className="flex-1 flex flex-col items-center group cursor-pointer min-w-0"
-                        title={`${hour.timeRange}: ${hour.totalScore} engagement score (${hour.engagementPercentage}%)`}
-                      >
-                        <div
-                          className={`w-full rounded-t transition-all duration-300 hover:opacity-80 ${isPeakHour
-                            ? 'bg-purple-600'
-                            : hour.totalScore > 0
-                              ? 'bg-purple-400'
-                              : 'bg-gray-300'
-                            }`}
-                          style={{ height: `${Math.max(height, 3)}%` }}
-                        />
-                        <span className={`text-xs mt-1 transition-all duration-300 whitespace-nowrap ${isPeakHour ? 'font-bold text-purple-600' : 'text-gray-500'
-                          } ${index % 3 === 0 ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                          {hour.hour % 12 === 0 ? 12 : hour.hour % 12}{hour.hour < 12 ? 'a' : 'p'}
+            {peakEngagementAnalysis.topPeakHours && peakEngagementAnalysis.topPeakHours.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Top 3 Peak Hours</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {peakEngagementAnalysis.topPeakHours.map((hour: any, index: number) => (
+                    <div key={hour.hour} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-600">
+                          #{index + 1} Peak
+                        </span>
+                        <span className="text-lg font-bold text-gray-900">
+                          {hour.timeRange}
                         </span>
                       </div>
-                    );
-                  })}
-                </div>
-                <div className="flex justify-between text-xs text-gray-500 mt-2 px-2">
-                  <span>12 AM</span>
-                  <span>6 AM</span>
-                  <span>12 PM</span>
-                  <span>6 PM</span>
-                  <span>11 PM</span>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                        <div
+                          className="bg-purple-600 h-2 rounded-full"
+                          style={{ width: `${hour.engagementPercentage}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-600">
+                        <span>{hour.clicks} clicks</span>
+                        <span>{hour.pageViews} views</span>
+                        <span className="font-semibold">{hour.engagementPercentage}%</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Period Analysis */}
+            {peakEngagementAnalysis.periodAnalysis && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Engagement by Time Period</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {Object.entries(peakEngagementAnalysis.periodAnalysis).map(([period, data]: [string, any]) => (
+                    <div key={period} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                      <div className="text-sm font-medium text-gray-600 capitalize mb-1">
+                        {period}
+                      </div>
+                      <div className="text-xl font-bold text-gray-900 mb-1">
+                        {data.percentage}%
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full"
+                          style={{ width: `${data.percentage}%` }}
+                        />
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        {data.totalClicks} clicks, {data.totalPageViews} views
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Day of Week Analysis */}
+            {peakEngagementAnalysis.dayOfWeekAnalysis && peakEngagementAnalysis.dayOfWeekAnalysis.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Engagement by Day of Week</h3>
+                <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
+                  {peakEngagementAnalysis.dayOfWeekAnalysis.map((day: any) => (
+                    <div key={day.day} className="bg-gray-50 p-2 rounded-lg border border-gray-200 text-center">
+                      <div className="text-xs font-medium text-gray-600 mb-1">
+                        {day.day.slice(0, 3)}
+                      </div>
+                      <div className="text-lg font-bold text-gray-900 mb-1">
+                        {day.totalScore}
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {day.clicks}c / {day.pageViews}v
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 24-Hour Engagement Chart */}
+            {peakEngagementAnalysis.hourlyBreakdown && peakEngagementAnalysis.hourlyBreakdown.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">24-Hour Engagement Breakdown</h3>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="h-48 flex items-end space-x-1 px-2">
+                    {peakEngagementAnalysis.hourlyBreakdown.map((hour: any, index: number) => {
+                      const maxScore = Math.max(...peakEngagementAnalysis.hourlyBreakdown.map((h: any) => h.totalScore));
+                      const height = maxScore > 0 ? (hour.totalScore / maxScore) * 100 : 0;
+                      const isPeakHour = peakEngagementAnalysis.overallPeakHour ? hour.hour === peakEngagementAnalysis.overallPeakHour.hour : false;
+
+                      return (
+                        <div
+                          key={hour.hour}
+                          className="flex-1 flex flex-col items-center group cursor-pointer min-w-0"
+                          title={`${hour.timeRange}: ${hour.totalScore} engagement score (${hour.engagementPercentage}%)`}
+                        >
+                          <div
+                            className={`w-full rounded-t transition-all duration-300 hover:opacity-80 ${isPeakHour
+                              ? 'bg-purple-600'
+                              : hour.totalScore > 0
+                                ? 'bg-purple-400'
+                                : 'bg-gray-300'
+                              }`}
+                            style={{ height: `${Math.max(height, 3)}%` }}
+                          />
+                          <span className={`text-xs mt-1 transition-all duration-300 whitespace-nowrap ${isPeakHour ? 'font-bold text-purple-600' : 'text-gray-500'
+                            } ${index % 3 === 0 ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                            {hour.hour % 12 === 0 ? 12 : hour.hour % 12}{hour.hour < 12 ? 'a' : 'p'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500 mt-2 px-2">
+                    <span>12 AM</span>
+                    <span>6 AM</span>
+                    <span>12 PM</span>
+                    <span>6 PM</span>
+                    <span>11 PM</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

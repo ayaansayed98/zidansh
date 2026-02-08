@@ -3,21 +3,44 @@
 
 import express from 'express';
 import cors from 'cors';
-import nodemailer from 'nodemailer';
+import { createTransport } from 'nodemailer';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
+import crypto from 'crypto';
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Endpoint to generate PayU Hash securely on backend
+app.post('/api/generate-hash', (req, res) => {
+  try {
+    const { txnid, amount, productinfo, firstname, email } = req.body;
+    const key = process.env.VITE_PAYU_KEY || 'GTKFFx';
+    const salt = process.env.VITE_PAYU_SALT || 'eCwWELxi';
+
+    const udf1 = ''; const udf2 = ''; const udf3 = ''; const udf4 = ''; const udf5 = '';
+
+    // key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||salt
+    const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|${udf1}|${udf2}|${udf3}|${udf4}|${udf5}||||||${salt}`;
+
+    const hash = crypto.createHash('sha512').update(hashString).digest('hex');
+    res.json({ success: true, hash });
+  } catch (error) {
+    console.error('Hash generation error:', error);
+    res.status(500).json({ success: false, error: 'Hash generation failed' });
+  }
+});
+
 
 // Create email transporter using Gmail (you'll need to set this up)
 let transporter = null;
 
 // Try to create transporter with environment variables
 if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
-  transporter = nodemailer.createTransporter({
+  transporter = createTransport({
     service: 'gmail',
     auth: {
       user: process.env.GMAIL_USER,
@@ -32,18 +55,18 @@ if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
 app.post('/api/send-email-otp', async (req, res) => {
   try {
     const { email, otp, subject } = req.body;
-    
+
     if (!transporter) {
       // Fallback to demo mode if email not configured
       console.log('DEMO MODE - Email not configured');
       console.log(`DEMO OTP for ${email}: ${otp}`);
-      return res.json({ 
-        success: true, 
+      return res.json({
+        success: true,
         message: 'Demo mode: Check console for OTP (Email not configured)',
-        demo: true 
+        demo: true
       });
     }
-    
+
     const mailOptions = {
       from: `"Zidansh" <${process.env.GMAIL_USER}>`,
       to: email,
@@ -86,23 +109,39 @@ app.post('/api/send-email-otp', async (req, res) => {
     await transporter.sendMail(mailOptions);
     console.log(`✅ OTP sent to ${email}: ${otp}`);
     res.json({ success: true, message: 'OTP sent successfully to your email', demo: false });
-    
+
   } catch (error) {
     console.error('Email send error:', error);
     res.status(500).json({ success: false, message: 'Failed to send email: ' + error.message });
   }
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`📧 Email server running on port ${PORT}`);
-  console.log(`📝 Setup instructions:`);
-  console.log(`   1. Create .env file with:`);
-  console.log(`      GMAIL_USER=your_gmail@gmail.com`);
-  console.log(`      GMAIL_PASS=your_app_password`);
-  console.log(`   2. Enable 2-Step Authentication in Gmail`);
-  console.log(`   3. Generate App Password: https://myaccount.google.com/apppasswords`);
-  console.log(`   4. Restart this server`);
-  console.log(``);
-  console.log(`🌐 Frontend should call: http://localhost:${PORT}/api/send-email-otp`);
+app.use(express.urlencoded({ extended: true })); // Handle form data from PayU
+
+// PayU Callback Routes
+app.post('/payment/success', (req, res) => {
+  console.log('✅ PayU Success Callback:', req.body);
+  const params = new URLSearchParams(req.body).toString();
+  // Redirect to frontend with params
+  const frontendUrl = process.env.VITE_FRONTEND_URL || 'http://localhost:5173';
+  res.redirect(`${frontendUrl}/payment/success?${params}`);
 });
+
+app.post('/payment/failure', (req, res) => {
+  console.log('❌ PayU Failure Callback:', req.body);
+  const params = new URLSearchParams(req.body).toString();
+  const frontendUrl = process.env.VITE_FRONTEND_URL || 'http://localhost:5173';
+  res.redirect(`${frontendUrl}/payment/failure?${params}`);
+});
+
+const PORT = process.env.PORT || 3001;
+
+// Only listen if not running on Vercel (serverless)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`👉 PayU Callbacks: http://localhost:${PORT}/payment/success & failure`);
+  });
+}
+
+export default app;

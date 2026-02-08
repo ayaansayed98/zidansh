@@ -1,4 +1,4 @@
-import { ShoppingBag, Heart, Menu, X, Search, User, LogOut, Package, UserCircle } from 'lucide-react';
+import { ShoppingBag, Heart, Menu, X, Search, User, LogOut, Package, UserCircle, ChevronDown, Mail, MessageCircle, Instagram } from 'lucide-react';
 const img1 = '/zidansh img/realimg/img1.jpg';
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -14,17 +14,27 @@ interface HeaderProps {
   onSignInClick?: () => void;
   onSignUpClick?: () => void;
   user?: any;
+  userProfile?: any;
   onSignOutClick?: () => void;
+  onCategorySelect?: (category: string) => void;
 }
 
-function Header({ cartCount: _cartCount, onCartClick: _onCartClick, favorites, products = [], onSignInClick, onSignUpClick, user, onSignOutClick }: HeaderProps) {
+const CATEGORIES = [
+  'Kurtis',
+  'Co-ord Sets',
+  'A line 2 piece sets',
+  '3 piece cotton sets',
+  'Plus size 3 piece cotton sets'
+];
+
+function Header({ cartCount: _cartCount, onCartClick: _onCartClick, favorites, products = [], onSignInClick, onSignUpClick, user, userProfile, onSignOutClick, onCategorySelect }: HeaderProps) {
   const navigate = useNavigate();
   // State for UI elements
   const [showFavorites, setShowFavorites] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
-  const [showTrackOrder, setShowTrackOrder] = useState(false);
+
 
   // State for search
   const [searchQuery, setSearchQuery] = useState('');
@@ -183,7 +193,7 @@ function Header({ cartCount: _cartCount, onCartClick: _onCartClick, favorites, p
           <div className="marquee-content flex items-center space-x-8 font-semibold">
             <span>🔥 Mega Sale: upto 50% OFF on selected Kurtis!</span>
             <span>🚚 Free Shipping on all orders above ₹999</span>
-            <span>✨ New Arrivals: Premium Combos starting at just ₹275</span>
+            <span>✨ New Arrivals: Premium Combos starting at just ₹349</span>
             <span>🕒 Limited Time Offer: Extra 5% OFF with code ZIDANSH5</span>
           </div>
         </div>
@@ -283,6 +293,100 @@ function Header({ cartCount: _cartCount, onCartClick: _onCartClick, favorites, p
             {/* Logo */}
             <div className="flex-shrink-0 mr-4">
               <Logo />
+            </div>
+
+            {/* Navigation Tabs */}
+            <div className="hidden md:flex items-center space-x-6 ml-6">
+              {/* Categories Dropdown */}
+              <div className="relative group">
+                <button className="flex items-center space-x-1 text-gray-700 hover:text-pink-600 font-medium py-4">
+                  <span>Categories</span>
+                  <ChevronDown className="w-4 h-4 transition-transform group-hover:-rotate-180" />
+                </button>
+                <div className="absolute top-full left-0 w-64 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[60] border border-pink-100 transform translate-y-2 group-hover:translate-y-0">
+                  {CATEGORIES.map((category) => (
+                    <button
+                      key={category}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                      onClick={() => {
+                        navigate('/');
+                        if (onCategorySelect) {
+                          onCategorySelect(category);
+                          // Small timeout to allow navigation to complete if needed, though usually state update is enough
+                          setTimeout(() => {
+                            const element = document.getElementById('featured-products');
+                            if (element) element.scrollIntoView({ behavior: 'smooth' });
+                          }, 100);
+                        }
+                      }}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Contact Us Dropdown */}
+              <div className="relative group">
+                <button className="flex items-center space-x-1 text-gray-700 hover:text-pink-600 font-medium py-4">
+                  <span>Contact Us</span>
+                  <ChevronDown className="w-4 h-4 transition-transform group-hover:-rotate-180" />
+                </button>
+                <div className="absolute top-full left-0 w-64 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[60] border border-pink-100 transform translate-y-2 group-hover:translate-y-0">
+                  <a
+                    href="https://wa.me/918454902834"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3 text-green-600">
+                      <MessageCircle className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="font-semibold block">WhatsApp</span>
+                      <span className="text-xs text-gray-500">Chat with us</span>
+                    </div>
+                  </a>
+                  <a
+                    href="https://www.instagram.com/zidanshenterprise?igsh=MTc5cGIwcW01OHhoeg%3D%3D&utm_source=qr"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center mr-3 text-pink-600">
+                      <Instagram className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="font-semibold block">Instagram</span>
+                      <span className="text-xs text-gray-500">DM us</span>
+                    </div>
+                  </a>
+                  <button
+                    onClick={() => {
+                      const email = 'support@zidansh.com';
+                      const gmailUrl = `https://mail.google.com/mail/?view=cm&to=${email}`;
+                      window.open(gmailUrl, '_blank');
+                    }}
+                    className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-left"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 text-blue-600">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="font-semibold block">Email</span>
+                      <span className="text-xs text-gray-500">Send us a mail</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* About Us Link */}
+              <Link
+                to="/about"
+                className="text-gray-700 hover:text-pink-600 font-medium transition-colors"
+              >
+                About Us
+              </Link>
             </div>
 
             {/* Desktop Icons - Pushed to right */}
@@ -441,7 +545,7 @@ function Header({ cartCount: _cartCount, onCartClick: _onCartClick, favorites, p
                         {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
                       </div>
                       <span className="hidden md:inline text-sm font-medium">
-                        {user.user_metadata?.full_name?.split(' ')[0] || 'Account'}
+                        {user.user_metadata?.full_name?.split(' ')[0] || userProfile?.username || 'Account'}
                       </span>
                     </div>
                   ) : (
@@ -452,14 +556,35 @@ function Header({ cartCount: _cartCount, onCartClick: _onCartClick, favorites, p
                   )}
                 </button>
                 {showAccount && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-50 border border-gray-200" data-account-dropdown>
+                  <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md z-50 border border-gray-200" data-account-dropdown>
                     {user ? (
                       <div className="py-1">
-                        <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {user.user_metadata?.full_name || 'User'}
+                        <div className="px-4 py-3 border-b border-gray-100 bg-pink-50/50">
+                          <p className="text-sm font-bold text-gray-900 truncate">
+                            {user.user_metadata?.full_name || userProfile?.username || 'User'}
                           </p>
-                          <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                          <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>
+
+                          {/* Extended Details */}
+                          {userProfile && (
+                            <div className="mt-2 pt-2 border-t border-gray-200/60 space-y-1">
+                              {userProfile.phone_number && (
+                                <p className="text-xs text-gray-600 flex items-center gap-1">
+                                  <span>📱</span> {userProfile.phone_number}
+                                </p>
+                              )}
+                              {userProfile.username && userProfile.username !== user.user_metadata?.full_name && (
+                                <p className="text-xs text-gray-600 flex items-center gap-1">
+                                  <span>👤</span> @{userProfile.username}
+                                </p>
+                              )}
+                              {userProfile.created_at && (
+                                <p className="text-[10px] text-gray-400 mt-1">
+                                  Member since {new Date(userProfile.created_at).toLocaleDateString()}
+                                </p>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <Link
                           to="/profile"
@@ -470,7 +595,7 @@ function Header({ cartCount: _cartCount, onCartClick: _onCartClick, favorites, p
                           <span>My Profile</span>
                         </Link>
                         <Link
-                          to="/orders"
+                          to="/profile"
                           className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-700 flex items-center space-x-2"
                           onClick={() => setShowAccount(false)}
                         >

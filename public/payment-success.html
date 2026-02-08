@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing Payment...</title>
+</head>
+
+<body>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">
+        <div style="text-align: center;">
+            <h2>Payment Successful</h2>
+            <p>Redirecting you back to the store...</p>
+        </div>
+    </div>
+    <script>
+        // Start by collecting all POST data
+        // In a static file we can't easily access POST body without backend, 
+        // BUT for client-side routing, we just need to get back to the app.
+        // PayU sends data in body, which is lost here without a server, 
+        // but the redirection is key.
+
+        // Redirect to the React App's success route
+        setTimeout(() => {
+            window.location.href = '/payment/success' + window.location.search;
+        }, 1500);
+    </script>
+</body>
+
+</html>

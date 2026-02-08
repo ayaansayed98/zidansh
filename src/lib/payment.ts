@@ -11,6 +11,7 @@ export interface PaymentData {
   customerPhone: string;
   orderId: string;
   description: string;
+  paymentMethod?: string;
 }
 
 export interface PaymentResult {
@@ -73,11 +74,29 @@ export const upiApps: UpiApp[] = [
 class PaymentService {
   private razorpayKeyId: string;
   private razorpayKeySecret: string;
+  private payuKey: string;
+  private isProduction: boolean;
 
   constructor() {
+    // Load PayU Environment
+    this.isProduction = import.meta.env.VITE_PAYU_ENV === 'production';
+
     // Load Razorpay keys from environment variables
     this.razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_your_key_here';
     this.razorpayKeySecret = import.meta.env.VITE_RAZORPAY_KEY_SECRET || 'your_secret_here';
+
+    // Load PayU keys
+    this.payuKey = import.meta.env.VITE_PAYU_KEY || 'GTKFFx'; // Test Key
+
+    // Validate production keys
+    if (this.isProduction) {
+      if (this.payuKey === 'GTKFFx') {
+        console.warn('WARNING: Using Test PayU Keys in Production Mode!');
+      }
+      if (!this.payuKey) {
+        console.error('ERROR: PayU Production Keys missing in .env');
+      }
+    }
   }
 
   // Load Razorpay script dynamically
@@ -116,66 +135,108 @@ class PaymentService {
     }
   }
 
-  // Process payment with Razorpay
-  async processPayment(paymentData: PaymentData): Promise<PaymentResult> {
+  // Helper to generate hash securely on backend
+  private async generateHash(data: any): Promise<string> {
     try {
-      // Load Razorpay script
-      const scriptLoaded = await this.loadRazorpayScript();
-      if (!scriptLoaded) {
-        return { success: false, error: 'Failed to load payment gateway' };
-      }
-
-      // Create order
-      const order = await this.createOrder(paymentData.amount, paymentData.currency, paymentData.orderId);
-
-      // Razorpay options
-      const options = {
-        key: this.razorpayKeyId,
-        amount: order.amount,
-        currency: order.currency,
-        name: 'Zidansh Fashion',
-        description: paymentData.description,
-        order_id: order.id,
-        prefill: {
-          name: paymentData.customerName,
-          email: paymentData.customerEmail,
-          contact: paymentData.customerPhone
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${backendUrl}/api/generate-hash`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
         },
-        theme: {
-          color: '#ec4899' // Pink theme to match your brand
-        },
-        handler: (response: any) => {
-          console.log('Payment successful:', response);
-          // Handle successful payment
-          this.handlePaymentSuccess(response, paymentData);
-        },
-        modal: {
-          ondismiss: () => {
-            console.log('Payment cancelled by user');
-            // Handle payment cancellation
-          }
-        }
-      };
-
-      // Open Razorpay checkout
-      const razorpayInstance = new (window as any).Razorpay(options);
-      razorpayInstance.open();
-
-      // Return promise that resolves when payment is complete
-      return new Promise((resolve) => {
-        razorpayInstance.on('payment.success', (response: any) => {
-          resolve({ success: true, paymentId: response.razorpay_payment_id });
-        });
-
-        razorpayInstance.on('payment.error', (error: any) => {
-          resolve({ success: false, error: error.description });
-        });
+        body: JSON.stringify(data)
       });
 
+      const result = await response.json();
+      if (!result.success || !result.hash) {
+        throw new Error(result.error || 'Failed to generate hash');
+      }
+
+      return result.hash;
     } catch (error) {
-      console.error('Payment processing error:', error);
-      return { success: false, error: 'Payment processing failed' };
+      console.error('Hash generation error:', error);
+      throw error;
     }
+  }
+
+  private submitPayUForm(params: any) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    // Use secure URL for production, test URL for development
+    form.action = this.isProduction
+      ? 'https://secure.payu.in/_payment'
+      : 'https://test.payu.in/_payment';
+
+    Object.keys(params).forEach(key => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = params[key];
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  // Process payment with PayU
+  async processPayment(paymentData: PaymentData): Promise<PaymentResult> {
+    try {
+      if (paymentData.paymentMethod === 'online' || paymentData.paymentMethod === 'payu') {
+        const txnid = paymentData.orderId;
+        const amount = paymentData.amount;
+        const productinfo = paymentData.description;
+        const firstname = paymentData.customerName.split(' ')[0];
+        const email = paymentData.customerEmail;
+        const phone = paymentData.customerPhone;
+
+        // Define success and failure URLs
+        // These must point to your BACKEND server which handles the POST callback
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+        const surl = `${backendUrl}/payment/success`;
+        const furl = `${backendUrl}/payment/failure`;
+
+        const hash = await this.generateHash({
+          txnid,
+          amount,
+          productinfo,
+          firstname,
+          email
+        });
+
+        // PayU specific parameters
+        const payuParams = {
+          key: this.payuKey,
+          txnid,
+          amount,
+          productinfo,
+          firstname,
+          email,
+          phone,
+          surl,
+          furl,
+          hash
+        };
+
+        this.submitPayUForm(payuParams);
+        // Since we are redirecting, we return a pending state
+        return { success: true, paymentId: 'redirecting_to_payu' };
+      }
+
+      return { success: false, error: 'Invalid payment method' };
+
+    } catch (error: any) {
+      console.error('Payment processing error:', error);
+      return {
+        success: false,
+        error: error.message || 'Payment processing failed'
+      };
+    }
+  }
+
+  // Check if running in production mode
+  public isProductionMode(): boolean {
+    return this.isProduction;
   }
 
   // Handle successful payment

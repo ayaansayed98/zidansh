@@ -4,15 +4,21 @@ import { Star, Heart, ChevronLeft, ChevronRight, AlertTriangle, Plus, Minus, Upl
 import { analyticsService, generateSessionId } from '../lib/analytics';
 import { reviewsService } from '../lib/reviews';
 import { Product, ProductVariation, getStockStatus, isVariationInStock } from '../types/product';
+import { User as UserProfile } from '../types/user';
+import { User } from '@supabase/supabase-js';
 
 interface ProductDetailProps {
   products: Product[];
   addToCart: (product: Product, variation: ProductVariation, quantity: number) => void;
   addToFavorites: (product: Product) => void;
   isFavorite: (productId: number) => boolean;
+  user?: User | null;
+  userProfile?: UserProfile | null;
 }
 
-function ProductDetail({ products, addToCart, addToFavorites, isFavorite }: ProductDetailProps) {
+import { saveRecentlyViewed } from '../lib/storage';
+
+function ProductDetail({ products, addToCart, addToFavorites, isFavorite, user, userProfile }: ProductDetailProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
@@ -33,10 +39,25 @@ function ProductDetail({ products, addToCart, addToFavorites, isFavorite }: Prod
   const [isImageModalOpen, setIsImageModalOpen] = useState<boolean>(false);
   const [selectedProductImage, setSelectedProductImage] = useState<string | null>(null);
   const [isProductImageModalOpen, setIsProductImageModalOpen] = useState<boolean>(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   const baseUrl = import.meta.env.BASE_URL || '';
 
   const product = products.find(p => p.id === parseInt(id || '0'));
+
+  // Save to recently viewed
+  useEffect(() => {
+    if (product) {
+      saveRecentlyViewed({
+        id: product.id,
+        name: product.name,
+        image: product.images[0],
+        price: product.basePrice,
+        viewedAt: Date.now()
+      });
+    }
+  }, [product]);
+
   const [inventory, setInventory] = useState<Record<string, { stock: number; isActive: boolean }>>({});
 
   // Fetch live inventory for this product
@@ -96,8 +117,22 @@ function ProductDetail({ products, addToCart, addToFavorites, isFavorite }: Prod
     })
   } : undefined, [product, inventory]);
 
+  const [configError, setConfigError] = useState<string | null>(null);
+
   // Fetch existing reviews when component mounts
   useEffect(() => {
+    // Check Supabase config
+    const sbUrl = import.meta.env.VITE_SUPABASE_URL;
+    const sbKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!sbUrl || !sbKey) {
+      const msg = 'Supabase environment variables are missing! Please check your .env file and RESTART the dev server (Ctrl+C, then npm run dev).';
+      console.error(msg);
+      setConfigError(msg);
+    } else {
+      console.log('ProductDetail: Supabase URL configured as', sbUrl.replace(/https:\/\/(.*)\.supabase\.co/, 'https://***.supabase.co'));
+    }
+
     if (currentProduct?.id) {
       fetchReviews(currentProduct.id);
     }
@@ -243,12 +278,22 @@ function ProductDetail({ products, addToCart, addToFavorites, isFavorite }: Prod
   // Review form handlers
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newImages = [...reviewImages, ...files].slice(0, 4); // Limit to 4 images
+
+    // Validate file size (max 2MB per image)
+    const validFiles = files.filter(file => {
+      const isValidSize = file.size <= 2 * 1024 * 1024; // 2MB
+      if (!isValidSize) {
+        alert(`Image ${file.name} is too large. Max size is 2MB.`);
+      }
+      return isValidSize;
+    });
+
+    const newImages = [...reviewImages, ...validFiles].slice(0, 4); // Limit to 4 images
 
     setReviewImages(newImages);
 
     // Create previews for new images
-    const newPreviews = files.map(file => URL.createObjectURL(file));
+    const newPreviews = validFiles.map(file => URL.createObjectURL(file));
     setImagePreviews([...imagePreviews, ...newPreviews].slice(0, 4));
   };
 
@@ -263,35 +308,65 @@ function ProductDetail({ products, addToCart, addToFavorites, isFavorite }: Prod
   const handleReviewSubmit = async () => {
     if (!currentProduct) return;
 
-    // Prepare review data
-    const reviewData = {
-      product_id: currentProduct.id,
-      customer_name: 'Anonymous Customer', // You can add a form for customer name/email
+    // Validation
+    if (reviewRating === 0) {
+      alert('Please select a star rating.');
+      return;
+    }
+    if (!reviewTitle.trim()) {
+      alert('Please enter a review title.');
+      return;
+    }
+    if (!reviewDescription.trim()) {
+      alert('Please enter a review description.');
+      return;
+    }
+
+    console.log('Submitting review for product:', currentProduct.id, {
       rating: reviewRating,
       title: reviewTitle,
-      description: reviewDescription,
-      images: reviewImages
-    };
+      images: reviewImages.length
+    });
 
-    // Submit review to database
-    const result = await reviewsService.submitReview(reviewData);
+    try {
+      // Prepare review data
+      const customerName = userProfile?.username || user?.user_metadata?.full_name || 'Anonymous Customer';
 
-    if (result.success) {
-      // Reset form
-      setReviewRating(0);
-      setReviewTitle('');
-      setReviewDescription('');
-      setReviewImages([]);
-      setImagePreviews([]);
+      const reviewData = {
+        product_id: currentProduct.id,
+        customer_name: customerName,
+        rating: reviewRating,
+        title: reviewTitle,
+        description: reviewDescription,
+        images: reviewImages
+      };
 
-      // Refresh reviews to show the new one
-      await fetchReviews(currentProduct.id);
+      // Submit review to database
+      const result = await reviewsService.submitReview(reviewData);
+      console.log('Submission result:', result);
 
-      // Show success message
-      alert('Thank you for your review! It has been submitted successfully.');
-    } else {
-      // Show error message
-      alert(`Failed to submit review: ${result.error}`);
+      if (result.success) {
+        // Reset form
+        setReviewRating(0);
+        setReviewTitle('');
+        setReviewDescription('');
+        setReviewImages([]);
+        setImagePreviews([]);
+
+        // Refresh reviews to show the new one
+        console.log('Fetching updated reviews...');
+        await fetchReviews(currentProduct.id);
+
+        // Show success message
+        alert('Thank you for your review! It has been submitted successfully.');
+      } else {
+        // Show error message
+        console.error('Submission failed:', result.error);
+        alert(`Failed to submit review: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Unexpected error in handleReviewSubmit:', error);
+      alert('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -317,6 +392,11 @@ function ProductDetail({ products, addToCart, addToFavorites, isFavorite }: Prod
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {configError && (
+        <div className="bg-red-600 text-white px-4 py-3 text-center font-bold">
+          CRITICAL ERROR: {configError}
+        </div>
+      )}
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <button
@@ -393,9 +473,15 @@ function ProductDetail({ products, addToCart, addToFavorites, isFavorite }: Prod
               <div className="mt-8 border-t border-gray-100 pt-6">
                 <h3 className="text-sm font-medium text-gray-900 mb-2 uppercase tracking-wider">Product Description</h3>
                 <div
-                  className="prose prose-sm text-gray-600 leading-relaxed"
+                  className={`prose prose-sm text-gray-600 leading-relaxed ${!showFullDescription ? 'line-clamp-2' : ''}`}
                   dangerouslySetInnerHTML={{ __html: currentProduct.description.replace(/\n/g, '<br />') }}
                 />
+                <button
+                  onClick={() => setShowFullDescription(!showFullDescription)}
+                  className="mt-2 text-primary-600 hover:text-primary-700 text-sm font-medium focus:outline-none"
+                >
+                  {showFullDescription ? 'See Less' : 'See More'}
+                </button>
               </div>
             )}
           </div>
@@ -409,10 +495,12 @@ function ProductDetail({ products, addToCart, addToFavorites, isFavorite }: Prod
                 <div className="flex items-center">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <span className="ml-1 text-lg font-semibold text-gray-700">
-                    {currentProduct.rating}
+                    {reviewStats ? reviewStats.averageRating.toFixed(1) : currentProduct.rating}
                   </span>
                 </div>
-                <span className="text-sm text-gray-500">({currentProduct.reviews} reviews)</span>
+                <span className="text-sm text-gray-500">
+                  ({reviewStats ? reviewStats.totalReviews : currentProduct.reviews} reviews)
+                </span>
               </div>
 
               <div className="flex items-center space-x-3 mt-4">

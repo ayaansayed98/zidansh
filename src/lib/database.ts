@@ -222,3 +222,29 @@ export const bulkOrderService = {
     return data;
   }
 };
+
+// Order Service
+export const orderService = {
+  async getUserOrders(email: string): Promise<any[]> {
+    const { data: user } = await supabase
+      .from('users')
+      .select('phone_number')
+      .eq('email_address', email)
+      .single();
+
+    let query = supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (user?.phone_number) {
+      query = query.or(`customer_email.eq.${email},customer_phone.eq.${user.phone_number}`);
+    } else {
+      query = query.eq('customer_email', email);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  }
+};

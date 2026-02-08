@@ -147,10 +147,12 @@ export const FORM_SCHEMAS: Record<string, FormSchema> = {
     },
     customerPhone: {
       required: true,
-      pattern: /^[6-9]\d{9}$/,
+      pattern: /^(\+?91|0)?[6-9]\d{9}$/,
       custom: (value: string) => {
-        if (!value || !/^[6-9]\d{9}$/.test(value)) {
-          return 'Please enter a valid 10-digit mobile number starting with 6-9';
+        // Remove spaces, dashes, +, and leading 0/91
+        const cleanNumber = value.replace(/[\s\-\+]/g, '').replace(/^(0|91)/, '');
+        if (!value || !/^[6-9]\d{9}$/.test(cleanNumber)) {
+          return 'Please enter a valid 10-digit mobile number';
         }
         return null;
       }

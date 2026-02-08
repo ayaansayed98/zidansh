@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { userService } from './lib/database';
 import Header from './components/Header';
@@ -7,12 +7,15 @@ import Carousel from './components/Carousel';
 import FeaturedProducts, { products as featuredProducts } from './components/FeaturedProducts';
 import Categories from './components/Categories';
 import Footer from './components/Footer';
+import { KeepShopping } from './components/KeepShopping';
 import ProductDetail from './components/ProductDetail';
 import CheckoutForm from './components/CheckoutForm';
 import CartManager from './components/CartManager';
 import Chatbot from './components/Chatbot';
 import WhatsAppWidget from './components/WhatsAppWidget';
 import ShippingReturns from './components/ShippingReturns';
+import AboutUs from './components/AboutUs';
+import Profile from './components/Profile';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import { SignInModal } from './components/SignInModal';
 import { SignUpModal } from './components/SignUpModal';
@@ -20,6 +23,8 @@ import { loadCartItems, loadFavorites, saveCartItems, saveFavorites } from './li
 import { Product, ProductVariation } from './types/product';
 import { CartItem as StorageCartItem } from './lib/storage';
 import { analyticsService, generateSessionId } from './lib/analytics';
+import LoadingScreen from './components/LoadingScreen';
+import PaymentStatus from './components/PaymentStatus';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -85,11 +90,20 @@ function AppContent() {
     );
   }, [location.pathname]);
 
+  const [userProfile, setUserProfile] = useState<any>(null);
+
   // Handle Supabase Auth state changes
   useEffect(() => {
     // Check key for initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const authUser = session?.user ?? null;
+      setUser(authUser);
+      if (authUser?.email) {
+        const profile = await userService.getUserByEmail(authUser.email);
+        setUserProfile(profile);
+      } else {
+        setUserProfile(null);
+      }
     });
 
     // Check for errors in URL (e.g. from Google Auth redirect)
@@ -101,21 +115,22 @@ function AppContent() {
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
-      setUser(session?.user ?? null);
+      const authUser = session?.user ?? null;
+      setUser(authUser);
 
-      if (session?.user) {
+      if (authUser) {
         // Check if user exists in database
-        const email = session.user.email;
+        const email = authUser.email;
         if (email) {
           try {
-            const existingUser = await userService.getUserByEmail(email);
+            let existingUser = await userService.getUserByEmail(email);
 
             if (!existingUser) {
               // Create new user from Google profile
-              const fullName = session.user.user_metadata.full_name || '';
+              const fullName = authUser.user_metadata.full_name || '';
               const username = fullName.split(' ')[0].toLowerCase() + Math.floor(Math.random() * 1000);
 
-              await userService.create({
+              existingUser = await userService.create({
                 username,
                 email_address: email,
                 // Only provide required fields, others are now optional
@@ -126,6 +141,7 @@ function AppContent() {
               // Update last signin
               await userService.updateUserSignin(existingUser.id);
             }
+            setUserProfile(existingUser);
           } catch (error) {
             console.error('Error syncing Google user:', error);
             // More detailed logging for debugging
@@ -137,6 +153,8 @@ function AppContent() {
         // Close modals if open
         setIsSignInOpen(false);
         setIsSignUpOpen(false);
+      } else {
+        setUserProfile(null);
       }
     });
 
@@ -237,13 +255,29 @@ function AppContent() {
 
   // Cart opening logic is now handled by the isCartOpen state
 
+  // Handle initial loading state
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial loading time for branding
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Debug log to verify products
   console.log('AppContent - products loaded:', products.length);
 
+  if (isInitialLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header
         user={user}
+        userProfile={userProfile}
         cartCount={cartItems.length}
         cartItems={cartItems}
         favorites={favorites}
@@ -252,64 +286,89 @@ function AppContent() {
         onSignInClick={() => setIsSignInOpen(true)}
         onSignUpClick={() => setIsSignUpOpen(true)}
         onSignOutClick={handleSignOut}
+        onCategorySelect={handleCategorySelect}
       />
-      <Routes>
-        <Route path="/" element={
-          <>
-            <Carousel
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={
+            <>
+              <Carousel
+                addToFavorites={addToFavorites}
+                isFavorite={isFavorite}
+                onProductSelect={navigateToProduct}
+              />
+              <KeepShopping />
+              <Categories
+                selectedCategory={selectedCategory}
+                setSelectedCategory={handleCategorySelect}
+              />
+              <FeaturedProducts
+                addToFavorites={addToFavorites}
+                isFavorite={isFavorite}
+                highlightedProduct={highlightedProduct}
+                showAll={showAllProducts}
+                setShowAll={setShowAllProducts}
+                navigateToProduct={navigateToProduct}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={handleCategorySelect}
+              />
+            </>
+          } />
+          <Route path="/product/:id" element={
+            <ProductDetail
+              products={products}
+              addToCart={addToCart}
               addToFavorites={addToFavorites}
               isFavorite={isFavorite}
-              onProductSelect={navigateToProduct}
+              user={user}
+              userProfile={userProfile}
             />
-            <Categories
-              selectedCategory={selectedCategory}
-              setSelectedCategory={handleCategorySelect}
+          } />
+
+          <Route path="/checkout" element={
+            <CheckoutForm
+              cartItems={cartItems.map(item => ({
+                id: item.cartItemId,
+                productId: item.productId,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                size: item.size,
+                image: item.image
+              }))}
+              onOrderComplete={handleOrderComplete}
+              onClose={() => navigate('/')}
+              onRemoveItem={removeFromCart}
             />
-            <FeaturedProducts
-              addToFavorites={addToFavorites}
-              isFavorite={isFavorite}
-              highlightedProduct={highlightedProduct}
-              showAll={showAllProducts}
-              setShowAll={setShowAllProducts}
-              navigateToProduct={navigateToProduct}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={handleCategorySelect}
-            />
-          </>
-        } />
-        <Route path="/product/:id" element={
-          <ProductDetail
-            products={products}
-            addToCart={addToCart}
-            addToFavorites={addToFavorites}
-            isFavorite={isFavorite}
-          />
-        } />
+          } />
 
-        <Route path="/checkout" element={
-          <CheckoutForm
-            cartItems={cartItems.map(item => ({
-              id: item.cartItemId,
-              name: item.name,
-              price: item.price,
-              quantity: item.quantity,
-              size: item.size,
-              image: item.image
-            }))}
-            onOrderComplete={handleOrderComplete}
-            onClose={() => navigate('/')}
-            onRemoveItem={removeFromCart}
-          />
-        } />
+          <Route path="/shipping-returns" element={
+            <ShippingReturns />
+          } />
 
-        <Route path="/shipping-returns" element={
-          <ShippingReturns />
-        } />
+          <Route path="/about" element={
+            <AboutUs />
+          } />
 
-        <Route path="/analytics" element={
-          <AnalyticsDashboard />
-        } />
-      </Routes>
+          <Route path="/profile" element={
+            <Profile user={user} userProfile={userProfile} onSignOut={handleSignOut} />
+          } />
+
+          <Route path="/analytics" element={
+            <AnalyticsDashboard />
+          } />
+          <Route path="/orders" element={
+            <Navigate to="/profile" replace />
+          } />
+
+          <Route path="/payment/success" element={
+            <PaymentStatus />
+          } />
+          <Route path="/payment/failure" element={
+            <PaymentStatus />
+          } />
+        </Routes>
+      </main>
 
       <CartManager
         isOpen={isCartOpen}

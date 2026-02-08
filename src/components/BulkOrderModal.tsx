@@ -90,16 +90,15 @@ export const BulkOrderModal: React.FC<BulkOrderModalProps> = ({
               id="type"
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 ${
-                errors.type ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 ${errors.type ? 'border-red-500' : 'border-gray-300'
+                }`}
             >
               <option value="" className="text-gray-900">Select a type</option>
-              <option value="T-Shirts" className="text-gray-900">T-Shirts</option>
-              <option value="Shirts" className="text-gray-900">Shirts</option>
-              <option value="Pants" className="text-gray-900">Pants</option>
-              <option value="Kurta" className="text-gray-900">Kurta</option>
-              <option value="Suits" className="text-gray-900">Suits</option>
+              <option value="Kurtis" className="text-gray-900">Kurtis</option>
+              <option value="Co-ord Sets" className="text-gray-900">Co-ord Sets</option>
+              <option value="A line 2 piece sets" className="text-gray-900">A line 2 piece sets</option>
+              <option value="3 piece cotton sets" className="text-gray-900">3 piece cotton sets</option>
+              <option value="Plus size 3 piece cotton sets" className="text-gray-900">Plus size 3 piece cotton sets</option>
               <option value="Other" className="text-gray-900">Other</option>
             </select>
             {errors.type && <p className="text-red-500 text-sm mt-1">{errors.type}</p>}
@@ -116,9 +115,8 @@ export const BulkOrderModal: React.FC<BulkOrderModalProps> = ({
               onChange={(e) => setQuantity(e.target.value)}
               min="1"
               placeholder="Enter quantity"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 ${
-                errors.quantity ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 ${errors.quantity ? 'border-red-500' : 'border-gray-300'
+                }`}
             />
             {errors.quantity && <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>}
           </div>

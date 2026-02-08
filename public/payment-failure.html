@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing Payment...</title>
+</head>
+
+<body>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">
+        <div style="text-align: center;">
+            <h2>Payment Processing Failed</h2>
+            <p>Redirecting you back to the store...</p>
+        </div>
+    </div>
+    <script>
+        // Redirect to the React App's failure route
+        setTimeout(() => {
+            window.location.href = '/payment/failure' + window.location.search;
+        }, 1500);
+    </script>
+</body>
+
+</html>
