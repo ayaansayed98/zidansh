@@ -339,6 +339,7 @@ function AppContent() {
               onOrderComplete={handleOrderComplete}
               onClose={() => navigate('/')}
               onRemoveItem={removeFromCart}
+              navigate={(path) => navigate(path)}
             />
           } />
 
