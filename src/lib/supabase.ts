@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+console.log('DEBUG SUPABASE:', import.meta.env);
+
 if (!supabaseUrl || !supabaseAnonKey) {
     console.error('CRITICAL ERROR: Supabase configuration is missing. Please check your .env file and ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.');
 }
