@@ -122,16 +122,7 @@ function ProductDetail({ products, addToCart, addToFavorites, isFavorite, user, 
   // Fetch existing reviews when component mounts
   useEffect(() => {
     // Check Supabase config
-    const sbUrl = import.meta.env.VITE_SUPABASE_URL;
-    const sbKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-    if (!sbUrl || !sbKey) {
-      const msg = 'Supabase environment variables are missing! Please check your .env file and RESTART the dev server (Ctrl+C, then npm run dev).';
-      console.error(msg);
-      setConfigError(msg);
-    } else {
-      console.log('ProductDetail: Supabase URL configured as', sbUrl.replace(/https:\/\/(.*)\.supabase\.co/, 'https://***.supabase.co'));
-    }
 
     if (currentProduct?.id) {
       fetchReviews(currentProduct.id);

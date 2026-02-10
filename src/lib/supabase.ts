@@ -8,6 +8,8 @@ const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 console.log('DEBUG SUPABASE:', import.meta.env);
 
-
+if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('CRITICAL ERROR: Supabase configuration is missing. Please check your .env file and ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
