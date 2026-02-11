@@ -21,11 +21,11 @@ const LoadingScreen: React.FC = () => {
 
     // Shared styles to ensure perfect alignment
     const textStyles: React.CSSProperties = {
-        fontFamily: '"Brush Script MT", cursive, "Comic Sans MS", sans-serif',
+        fontFamily: '"Kaushan Script", "Brush Script MT", cursive',
         transform: 'skewX(-5deg)',
         letterSpacing: '1px',
         fontWeight: 700,
-        fontSize: '3.5rem', // Slightly larger
+        fontSize: '3.5rem',
         lineHeight: '1.2',
         display: 'block',
         whiteSpace: 'nowrap'
