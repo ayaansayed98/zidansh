@@ -23,8 +23,8 @@ const LoadingScreen: React.FC = () => {
         fontFamily: "'Alex Brush', cursive",
         transform: 'skewX(-5deg)',
         letterSpacing: '1px',
-        fontWeight: 700,
-        fontSize: '3.5rem',
+        fontWeight: 400,
+        fontSize: '4rem',
         lineHeight: '1.2',
         display: 'block',
         whiteSpace: 'nowrap'

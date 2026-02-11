@@ -15,8 +15,8 @@ const Logo: React.FC = () => {
           backgroundClip: 'text',
           transform: 'skewX(-5deg)',
           letterSpacing: '1px',
-          fontWeight: 700,
-          fontSize: '2rem',
+          fontWeight: 400,
+          fontSize: '2.5rem',
           backgroundColor: 'transparent',
           padding: '0 4px'
         }}
