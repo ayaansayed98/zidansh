@@ -6,19 +6,19 @@ const Logo: React.FC = () => {
     <Link to="/" className="flex items-center px-4 py-2">
       <span
         style={{
-          fontFamily: '"Kaushan Script", "Brush Script MT", cursive',
-          background: 'linear-gradient(90deg, #4B0082 0%, #8B008B 20%, #FF1493 35%, #DC143C 50%, #FF4500 70%, #FFA500 85%, #FFD700 100%)',
+          fontFamily: '"Outfit", sans-serif',
+          background: 'linear-gradient(to right, #6a11cb 0%, #ff4b1f 50%, #ff9068 100%)', // Adjusted gradient to match provided image
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
-          transform: 'skewX(-5deg)',
-          letterSpacing: '1px',
-          fontWeight: 700,
-          fontSize: '1.8rem',
+          letterSpacing: '-0.02em',
+          fontWeight: 800,
+          fontSize: '2rem',
           backgroundColor: 'transparent',
+          padding: '0 4px' // Add slight padding to prevent clipping
         }}
       >
-        ZIDANSH
+        Zidansh
       </span>
     </Link>
   );
