@@ -617,7 +617,12 @@ export const analyticsService = {
         }]);
 
       if (error) console.error('Error tracking page view:', error);
-    } catch (error) {
+    } catch (error: any) {
+      // Ignore network errors which are common with ad blockers
+      if (error?.message?.includes('Failed to fetch') || error?.details?.includes('Failed to fetch')) {
+        console.warn('Analytics tracking blocked (likely by ad blocker)');
+        return;
+      }
       console.error('Error tracking page view:', error);
     }
   },
