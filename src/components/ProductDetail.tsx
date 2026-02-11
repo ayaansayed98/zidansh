@@ -117,7 +117,7 @@ function ProductDetail({ products, addToCart, addToFavorites, isFavorite, user, 
     })
   } : undefined, [product, inventory]);
 
-  const [configError, setConfigError] = useState<string | null>(null);
+  // const [configError, setConfigError] = useState<string | null>(null);
 
   // Fetch existing reviews when component mounts
   useEffect(() => {
@@ -383,11 +383,7 @@ function ProductDetail({ products, addToCart, addToFavorites, isFavorite, user, 
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {configError && (
-        <div className="bg-red-600 text-white px-4 py-3 text-center font-bold">
-          CRITICAL ERROR: {configError}
-        </div>
-      )}
+
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <button
