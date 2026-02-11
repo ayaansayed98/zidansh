@@ -5,8 +5,10 @@ const Logo: React.FC = () => {
   return (
     <Link to="/" className="flex items-center px-4 py-2">
       <span
+        className="font-alex-brush"
         style={{
-          fontFamily: '"Kaushan Script", "Brush Script MT", cursive',
+          // Using Alex Brush as it is closer to the original Brush Script MT
+          fontFamily: "'Alex Brush', cursive",
           background: 'linear-gradient(90deg, #4B0082 0%, #8B008B 20%, #FF1493 35%, #DC143C 50%, #FF4500 70%, #FFA500 85%, #FFD700 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',

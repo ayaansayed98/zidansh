@@ -19,9 +19,8 @@ const LoadingScreen: React.FC = () => {
         return () => clearInterval(timer);
     }, []);
 
-    // Shared styles to ensure perfect alignment
     const textStyles: React.CSSProperties = {
-        fontFamily: '"Kaushan Script", "Brush Script MT", cursive',
+        fontFamily: "'Alex Brush', cursive",
         transform: 'skewX(-5deg)',
         letterSpacing: '1px',
         fontWeight: 700,
