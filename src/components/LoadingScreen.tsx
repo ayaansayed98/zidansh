@@ -20,10 +20,11 @@ const LoadingScreen: React.FC = () => {
     }, []);
 
     const textStyles: React.CSSProperties = {
-        fontFamily: "'Alex Brush', cursive",
-        transform: 'skewX(-5deg)',
-        letterSpacing: '1px',
-        fontWeight: 400,
+        fontFamily: "'Poppins', sans-serif",
+        // transform: 'skewX(-5deg)', // Removed skew for modern look
+        letterSpacing: '2px',
+        fontWeight: 700,
+        fontStyle: 'oblique',
         fontSize: '4rem',
         lineHeight: '1.2',
         display: 'block',
