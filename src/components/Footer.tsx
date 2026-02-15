@@ -82,6 +82,8 @@ function Footer() {
             <h4 className="text-black font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm">
               <li><Link to="/about" className="hover:text-primary-400 transition">About Us</Link></li>
+              <li><Link to="/terms-and-conditions" className="hover:text-primary-400 transition">Terms & Conditions</Link></li>
+              <li><Link to="/privacy-policy" className="hover:text-primary-400 transition">Privacy Policy</Link></li>
               <li>
                 <button
                   onClick={() => setIsContactModalOpen(true)}

@@ -15,6 +15,8 @@ import Chatbot from './components/Chatbot';
 import WhatsAppWidget from './components/WhatsAppWidget';
 import ShippingReturns from './components/ShippingReturns';
 import AboutUs from './components/AboutUs';
+import TermsAndConditions from './components/TermsAndConditions';
+import PrivacyPolicy from './components/PrivacyPolicy';
 import Profile from './components/Profile';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import { SignInModal } from './components/SignInModal';
@@ -345,6 +347,14 @@ function AppContent() {
 
           <Route path="/shipping-returns" element={
             <ShippingReturns />
+          } />
+
+          <Route path="/terms-and-conditions" element={
+            <TermsAndConditions />
+          } />
+
+          <Route path="/privacy-policy" element={
+            <PrivacyPolicy />
           } />
 
           <Route path="/about" element={
