@@ -164,7 +164,7 @@ function Footer() {
         </div>
 
         <div className="border-t border-gray-800 pt-4 text-center text-sm relative z-10">
-          <p className="mb-2 text-black">&copy; 2025 <span style={{
+          <p className="mb-2 text-black">&copy; 2026 <span style={{
             fontFamily: "'Poppins', sans-serif",
             background: 'linear-gradient(90deg, #4B0082 0%, #8B008B 20%, #FF1493 35%, #DC143C 50%, #FF4500 70%, #FFA500 85%, #FFD700 100%)',
             WebkitBackgroundClip: 'text',
