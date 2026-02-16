@@ -14,7 +14,7 @@ const Logo: React.FC = () => {
           letterSpacing: '2px', // increased slightly for sans-serif
           fontWeight: 700,
           fontStyle: 'oblique',
-          fontSize: '2.5rem',
+          fontSize: 'clamp(1.8rem, 5vw, 2.5rem)',
           backgroundColor: 'transparent',
           padding: '0 4px'
         }}

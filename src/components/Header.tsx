@@ -211,7 +211,7 @@ function Header({ cartCount: _cartCount, onCartClick: _onCartClick, favorites, p
             </div>
 
             {/* Icons & Menu (Extreme Right) */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1 sm:space-x-3">
               <button
                 onClick={() => setShowFavorites(!showFavorites)}
                 className="text-gray-700 hover:text-pink-600 p-1 relative"
@@ -277,6 +277,86 @@ function Header({ cartCount: _cartCount, onCartClick: _onCartClick, favorites, p
                   </span>
                 )}
               </button>
+
+              <div className="relative">
+                <button
+                  className="text-gray-700 hover:text-gray-900 p-1 relative"
+                  onClick={() => {
+                    buttonTrackingService.trackButtonClick({
+                      button_name: 'My Account Button',
+                      button_location: 'header_mobile',
+                      page_url: window.location.pathname
+                    });
+                    setShowAccount(!showAccount);
+                  }}
+                  data-account-button
+                >
+                  <User className="h-6 w-6" />
+                </button>
+                {showAccount && (
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white shadow-lg rounded-md z-50 border border-gray-200" data-account-dropdown>
+                    {user ? (
+                      <div className="py-1">
+                        <div className="px-4 py-3 border-b border-gray-100 bg-pink-50/50">
+                          <p className="text-sm font-bold text-gray-900 truncate">
+                            {user.user_metadata?.full_name || userProfile?.username || 'User'}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>
+                        </div>
+                        <Link
+                          to="/profile"
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-700 flex items-center space-x-2"
+                          onClick={() => setShowAccount(false)}
+                        >
+                          <UserCircle className="w-4 h-4" />
+                          <span>My Profile</span>
+                        </Link>
+                        <Link
+                          to="/profile"
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-700 flex items-center space-x-2"
+                          onClick={() => setShowAccount(false)}
+                        >
+                          <Package className="w-4 h-4" />
+                          <span>My Orders</span>
+                        </Link>
+                        <div className="border-t border-gray-100 pt-1">
+                          <button
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                            onClick={() => {
+                              setShowAccount(false);
+                              if (onSignOutClick) onSignOutClick();
+                            }}
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>Sign Out</span>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-1">
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white hover:shadow-lg"
+                          onClick={() => {
+                            setShowAccount(false);
+                            if (onSignInClick) onSignInClick();
+                          }}
+                        >
+                          Sign In
+                        </button>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white hover:shadow-lg"
+                          onClick={() => {
+                            setShowAccount(false);
+                            if (onSignUpClick) onSignUpClick();
+                          }}
+                        >
+                          Sign Up
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <button
                 className="text-gray-700 hover:text-gray-900 p-1"
