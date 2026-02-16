@@ -2,21 +2,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Info, Mail, Phone, X, CreditCard, Banknote } from 'lucide-react';
 import { analyticsService } from '../lib/analytics';
-import { paymentService } from '../lib/payment';
 import { inventoryService } from '../lib/inventory';
 import { saveCartItems } from '../lib/storage';
 import { validateForm, FORM_SCHEMAS } from '../lib/validation';
-
-type PaymentData = {
-  amount: number;
-  currency: string;
-  orderId: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  paymentMethod?: string;
-  description: string;
-};
 
 interface CartItem {
   id: string;
@@ -285,24 +273,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       };
 
       if (selectedPaymentMethod !== 'cash') {
-        const paymentData: PaymentData = {
-          amount: orderCalculations.total,
-          currency: 'INR',
-          orderId,
-          customerName: formData.customerName,
-          customerEmail: formData.customerEmail,
-          customerPhone: formData.customerPhone,
-          paymentMethod: selectedPaymentMethod,
-          description: `Order ${orderId}`
-        };
-
-        const paymentResult = await paymentService.processPayment(paymentData);
-        if (paymentResult.success) {
-          orderData.paymentId = paymentResult.paymentId;
-          orderData.status = 'processing';
-        } else {
-          throw new Error(paymentResult.error || 'Payment failed');
-        }
+        // Redirect to PayU Payment Link
+        window.location.href = 'https://dashboard-staging.payu.in/pay/CEA92A7D1F0DF1D5EEFE3E1157B0EE08';
+        return;
       } else {
         console.log('Processing Cash Payment...');
         try {
