@@ -215,7 +215,12 @@ class PaymentService {
           phone,
           surl,
           furl,
-          hash
+          hash,
+          udf1: '',
+          udf2: '',
+          udf3: '',
+          udf4: '',
+          udf5: ''
         };
 
         this.submitPayUForm(payuParams);

@@ -1550,7 +1550,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6">
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-7 gap-2 sm:gap-6">
           {displayProducts.length === 0 ? (
             <div className="col-span-full text-center py-8">
               <p className="text-gray-600">No products found</p>
@@ -1568,7 +1568,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                   }`}
                 onMouseEnter={() => trackProductView(product)}
               >
-                <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden bg-gray-100">
+                <div className="relative h-44 sm:h-56 md:h-72 overflow-hidden bg-gray-100">
                   {/* skeleton placeholder until image loads */}
                   {!imgLoaded[product.id] && (
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -1614,29 +1614,29 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                   </button>
                 </div>
 
-                <div className="p-3 md:p-4 space-y-2 md:space-y-3">
+                <div className="p-1.5 sm:p-4 space-y-1 sm:space-y-3">
                   <div>
-                    <p className="text-xs text-gray-500 font-medium">{product.brand}</p>
-                    <h3 className="text-lg font-semibold text-gray-900 mt-1 line-clamp-1">
+                    <p className="text-[10px] sm:text-xs text-gray-500 font-medium line-clamp-1">{product.brand}</p>
+                    <h3 className="text-[11px] sm:text-lg font-semibold text-gray-900 mt-0.5 sm:mt-1 line-clamp-1">
                       {product.name}
                     </h3>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-0.5 sm:space-x-1">
                     <div className="flex items-center">
-                      <Star className={`h-4 w-4 ${reviewStats[product.id]?.totalReviews ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`} />
-                      <span className="ml-1 text-sm font-semibold text-gray-700">
+                      <Star className={`h-3 w-3 sm:h-4 sm:w-4 ${reviewStats[product.id]?.totalReviews ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`} />
+                      <span className="ml-0.5 text-[10px] sm:text-sm font-semibold text-gray-700">
                         {reviewStats[product.id]?.averageRating || 0}
                       </span>
                     </div>
-                    <span className="text-xs text-gray-500">({reviewStats[product.id]?.totalReviews || 0} reviews)</span>
+                    <span className="text-[8px] sm:text-xs text-gray-500">({reviewStats[product.id]?.totalReviews || 0})</span>
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <span className="text-2xl font-bold text-gray-900">
+                  <div className="flex flex-col sm:flex-row sm:items-center space-y-0.5 sm:space-y-0 sm:space-x-2">
+                    <span className="text-xs sm:text-2xl font-bold text-gray-900">
                       ₹{product.basePrice}
                     </span>
-                    <span className="text-sm text-gray-400 line-through font-light">
+                    <span className="text-[9px] sm:text-sm text-gray-400 line-through font-light">
                       ₹{product.baseOriginalPrice}
                     </span>
                   </div>

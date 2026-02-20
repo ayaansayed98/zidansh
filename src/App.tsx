@@ -58,8 +58,14 @@ function AppContent() {
   };
 
   const handleProceedToCheckout = () => {
+    if (!user) {
+      setIsSignInOpen(true);
+      closeCart();
+      return;
+    }
     closeCart();
     navigate('/checkout');
+    window.scrollTo(0, 0);
   };
 
   const handleSignOut = async () => {

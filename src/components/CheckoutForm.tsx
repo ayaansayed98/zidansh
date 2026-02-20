@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Info, Mail, Phone, X, CreditCard, Banknote } from 'lucide-react';
 import { analyticsService } from '../lib/analytics';
 import { inventoryService } from '../lib/inventory';
 import { saveCartItems } from '../lib/storage';
 import { validateForm, FORM_SCHEMAS } from '../lib/validation';
+import { paymentService } from '../lib/payment';
 
 interface CartItem {
   id: string;
@@ -142,6 +143,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string, discount: number } | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [mobileStep, setMobileStep] = useState<'summary' | 'details'>('summary');
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const quickPaymentMethods = [
     { id: 'online', name: 'Online Payment', description: 'Cards, UPI, NetBanking', icon: CreditCard },
@@ -273,8 +279,20 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       };
 
       if (selectedPaymentMethod !== 'cash') {
-        // Redirect to PayU Payment Link
-        window.location.href = 'https://dashboard-staging.payu.in/pay/CEA92A7D1F0DF1D5EEFE3E1157B0EE08';
+        const result = await paymentService.processPayment({
+          amount: orderCalculations.total,
+          currency: 'INR',
+          customerName: formData.customerName,
+          customerEmail: formData.customerEmail,
+          customerPhone: formData.customerPhone,
+          orderId: orderId,
+          description: `Order ${orderId}`,
+          paymentMethod: selectedPaymentMethod
+        });
+
+        if (!result.success) {
+          throw new Error(result.error || 'Payment initialization failed');
+        }
         return;
       } else {
         console.log('Processing Cash Payment...');
@@ -353,7 +371,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         {/* Main Content */}
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           {/* Order Summary */}
-          <div className="w-full md:w-2/5 lg:w-96 bg-gray-50 p-4 border-r border-gray-200 overflow-y-auto">
+          <div className={`w-full md:w-2/5 lg:w-96 bg-gray-50 p-4 border-r border-gray-200 overflow-y-auto ${mobileStep === 'summary' ? 'block' : 'hidden md:block'}`}>
             <h3 className="font-medium text-gray-900 mb-3">Order Summary</h3>
             <div className="space-y-2">
               {(() => {
@@ -468,14 +486,46 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 <span>Total</span>
                 <span>₹{orderCalculations.total.toFixed(2)}</span>
               </div>
+
+              {/* Mobile next step button */}
+              <div className="md:hidden mt-6 pb-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileStep('details');
+                    window.scrollTo(0, 0);
+                    setTimeout(() => {
+                      const container = document.getElementById('details-scroll-container');
+                      if (container) container.scrollTop = 0;
+                    }, 0);
+                  }}
+                  className="w-full py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-900 transition-colors"
+                >
+                  Continue to Details
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Wrapper for Form and Buttons (Right Side) */}
-          <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+          <div className={`flex-1 flex-col h-full overflow-hidden relative ${mobileStep === 'details' ? 'flex' : 'hidden md:flex'}`}>
             {/* Scrollable Form Content */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto" id="details-scroll-container">
               <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                {/* Mobile back button */}
+                <div className="md:hidden mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setMobileStep('summary')}
+                    className="flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back to Order Summary
+                  </button>
+                </div>
+
                 <div>
                   <h3 className="font-medium text-gray-900 mb-3">Customer Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

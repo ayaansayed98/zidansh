@@ -19,7 +19,7 @@ app.post('/api/generate-hash', (req, res) => {
   try {
     const { txnid, amount, productinfo, firstname, email } = req.body;
     const key = process.env.VITE_PAYU_KEY || 'GTKFFx';
-    const salt = process.env.VITE_PAYU_SALT || 'eCwWELxi';
+    const salt = process.env.VITE_PAYU_SALT || '4R38IvwiV57FwVpsgOvTXBdLE4tHUXFW';
 
     const udf1 = ''; const udf2 = ''; const udf3 = ''; const udf4 = ''; const udf5 = '';
 
