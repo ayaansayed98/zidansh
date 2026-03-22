@@ -226,7 +226,7 @@ export const bulkOrderService = {
 // Order Service
 export const orderService = {
   async getUserOrders(email: string): Promise<any[]> {
-    const fetchOrders = async () => {
+    try {
       const { data: user } = await supabase
         .from('users')
         .select('phone_number')
@@ -247,12 +247,10 @@ export const orderService = {
       const { data, error } = await query;
       if (error) throw error;
       return data || [];
-    };
-
-    return Promise.race([
-      fetchOrders(),
-      new Promise<any[]>((_, reject) => setTimeout(() => reject(new Error('Fetch timeout')), 5000))
-    ]);
+    } catch (error) {
+      console.error('Error in getUserOrders:', error);
+      throw error;
+    }
   },
 
   async createOrder(orderData: any): Promise<any> {
