@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: zidansh-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: PORT
+        value: 10000
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_PASS
+        sync: false
+      - key: VITE_PAYU_KEY
+        sync: false
+      - key: VITE_PAYU_SALT
+        sync: false
+      - key: VITE_PAYU_ENV
+        value: production
+      - key: VITE_FRONTEND_URL
+        value: https://zidansh.vercel.app
