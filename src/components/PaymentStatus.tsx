@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { inventoryService } from '../lib/inventory';
 import { loadCartItems, saveCartItems } from '../lib/storage';
+import { orderService } from '../lib/database';
 
 const PaymentStatus: React.FC = () => {
     const location = useLocation();
@@ -43,6 +44,12 @@ const PaymentStatus: React.FC = () => {
                                 name: item.name
                             })));
 
+                            const orderId = searchParams.get('orderId') || searchParams.get('txnid');
+                            if (orderId) {
+                                await orderService.updateOrderStatus(orderId, 'processing');
+                                console.log('Order status updated to processing.');
+                            }
+
                             // Clear cart
                             saveCartItems([]);
                             // Dispatch custom event to notify App.tsx to reload cart
@@ -65,6 +72,11 @@ const PaymentStatus: React.FC = () => {
 
         } else if (location.pathname.includes('/failure')) {
             setStatus('failure');
+            const orderId = searchParams.get('orderId') || searchParams.get('txnid');
+            if (orderId && !processed) {
+                setProcessed(true);
+                orderService.updateOrderStatus(orderId, 'cancelled').catch(console.error);
+            }
         } else {
             setStatus('failure');
         }

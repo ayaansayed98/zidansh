@@ -226,25 +226,57 @@ export const bulkOrderService = {
 // Order Service
 export const orderService = {
   async getUserOrders(email: string): Promise<any[]> {
-    const { data: user } = await supabase
-      .from('users')
-      .select('phone_number')
-      .eq('email_address', email)
+    const fetchOrders = async () => {
+      const { data: user } = await supabase
+        .from('users')
+        .select('phone_number')
+        .eq('email_address', email)
+        .single();
+
+      let query = supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (user?.phone_number) {
+        query = query.or(`customer_email.eq.${email},customer_phone.eq.${user.phone_number}`);
+      } else {
+        query = query.eq('customer_email', email);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    };
+
+    return Promise.race([
+      fetchOrders(),
+      new Promise<any[]>((_, reject) => setTimeout(() => reject(new Error('Fetch timeout')), 5000))
+    ]);
+  },
+
+  async createOrder(orderData: any): Promise<any> {
+    const { data, error } = await supabase
+      .from('orders')
+      .insert(orderData)
+      .select()
       .single();
 
-    let query = supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (user?.phone_number) {
-      query = query.or(`customer_email.eq.${email},customer_phone.eq.${user.phone_number}`);
-    } else {
-      query = query.eq('customer_email', email);
+    if (error) {
+      console.error('Error creating order in DB:', error);
+      throw error;
     }
+    return data;
+  },
 
-    const { data, error } = await query;
-    if (error) throw error;
-    return data || [];
+  async updateOrderStatus(orderId: string, status: string): Promise<void> {
+    const { error } = await supabase
+      .from('orders')
+      .update({ status })
+      .eq('order_id', orderId);
+      
+    if (error) {
+      console.error('Error updating order status:', error);
+    }
   }
 };

@@ -18,15 +18,22 @@ app.use(express.json());
 app.post('/api/generate-hash', (req, res) => {
   try {
     const { txnid, amount, productinfo, firstname, email } = req.body;
-    const key = process.env.VITE_PAYU_KEY || 'GTKFFx';
-    const salt = process.env.VITE_PAYU_SALT || '4R38IvwiV57FwVpsgOvTXBdLE4tHUXFW';
+    const key = process.env.VITE_PAYU_KEY || 'gtKFFx';
+    const salt = process.env.VITE_PAYU_SALT || 'eCwWELxi';
 
     const udf1 = ''; const udf2 = ''; const udf3 = ''; const udf4 = ''; const udf5 = '';
 
     // key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||salt
     const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|${udf1}|${udf2}|${udf3}|${udf4}|${udf5}||||||${salt}`;
 
+    console.log('DEBUG HASH GENERATION:');
+    console.log('Using Key:', key);
+    console.log('Using Salt:', salt.substring(0, 3) + '...');
+    console.log('Hash String:', hashString);
+
     const hash = crypto.createHash('sha512').update(hashString).digest('hex');
+    console.log('Computed Hash:', hash);
+
     res.json({ success: true, hash });
   } catch (error) {
     console.error('Hash generation error:', error);

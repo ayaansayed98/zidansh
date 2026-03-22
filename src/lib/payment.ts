@@ -86,7 +86,7 @@ class PaymentService {
     this.razorpayKeySecret = import.meta.env.VITE_RAZORPAY_KEY_SECRET || 'your_secret_here';
 
     // Load PayU keys
-    this.payuKey = import.meta.env.VITE_PAYU_KEY || 'GTKFFx'; // Test Key
+    this.payuKey = import.meta.env.VITE_PAYU_KEY || 'gtKFFx'; // Test Key
 
     // Validate production keys
     if (this.isProduction) {

@@ -49,7 +49,7 @@ export const products: ProductType[] = [
     * Top Design Styling: Panelled / Front-Slit
     * Top Hemline: Flared (below the slit)`,
     cloth_type: 'A line 2 piece sets',
-    basePrice: 699,
+    basePrice: 1,
     baseOriginalPrice: 1099,
     rating: 4.5,
     reviews: 1234,
@@ -62,11 +62,11 @@ export const products: ProductType[] = [
       }
     ],
     variations: [
-      { id: 'var_1_1', sku: 'PRD001-S', attributes: { Size: 'S' }, price: 699, originalPrice: 1099, stock: 0, lowStockThreshold: 5, isActive: true },
-      { id: 'var_1_2', sku: 'PRD001-M', attributes: { Size: 'M' }, price: 699, originalPrice: 1099, stock: 0, lowStockThreshold: 5, isActive: true },
-      { id: 'var_1_3', sku: 'PRD001-L', attributes: { Size: 'L' }, price: 699, originalPrice: 1099, stock: 0, lowStockThreshold: 5, isActive: true },
-      { id: 'var_1_4', sku: 'PRD001-XL', attributes: { Size: 'XL' }, price: 699, originalPrice: 1099, stock: 0, lowStockThreshold: 5, isActive: true },
-      { id: 'var_1_5', sku: 'PRD001-2XL', attributes: { Size: '2XL' }, price: 699, originalPrice: 1099, stock: 0, lowStockThreshold: 5, isActive: true }
+      { id: 'var_1_1', sku: 'PRD001-S', attributes: { Size: 'S' }, price: 1, originalPrice: 1099, stock: 10, lowStockThreshold: 5, isActive: true },
+      { id: 'var_1_2', sku: 'PRD001-M', attributes: { Size: 'M' }, price: 1, originalPrice: 1099, stock: 10, lowStockThreshold: 5, isActive: true },
+      { id: 'var_1_3', sku: 'PRD001-L', attributes: { Size: 'L' }, price: 1, originalPrice: 1099, stock: 10, lowStockThreshold: 5, isActive: true },
+      { id: 'var_1_4', sku: 'PRD001-XL', attributes: { Size: 'XL' }, price: 1, originalPrice: 1099, stock: 10, lowStockThreshold: 5, isActive: true },
+      { id: 'var_1_5', sku: 'PRD001-2XL', attributes: { Size: '2XL' }, price: 1, originalPrice: 1099, stock: 10, lowStockThreshold: 5, isActive: true }
     ],
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-12-01'),

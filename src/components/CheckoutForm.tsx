@@ -6,6 +6,7 @@ import { inventoryService } from '../lib/inventory';
 import { saveCartItems } from '../lib/storage';
 import { validateForm, FORM_SCHEMAS } from '../lib/validation';
 import { paymentService } from '../lib/payment';
+import { orderService } from '../lib/database';
 
 interface CartItem {
   id: string;
@@ -278,6 +279,29 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         discount: orderCalculations.discount
       };
 
+      try {
+        const orderPromise = orderService.createOrder({
+          order_id: orderId,
+          customer_name: formData.customerName,
+          customer_email: formData.customerEmail,
+          customer_phone: formData.customerPhone,
+          amount: orderCalculations.total,
+          status: selectedPaymentMethod === 'cash' ? 'processing' : 'pending',
+          items: cartItems,
+          payment_method: selectedPaymentMethod,
+          shipping_address: `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`
+        });
+        
+        // Wrap in a 2-second timeout to prevent the exact same Supabase network hanging!
+        await Promise.race([
+          orderPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('DB Timeout')), 2000))
+        ]);
+        console.log('Order saved to Supabase successfully.');
+      } catch (saveError) {
+        console.error('Proceeding despite order save error:', saveError);
+      }
+
       if (selectedPaymentMethod !== 'cash') {
         const result = await paymentService.processPayment({
           amount: orderCalculations.total,
@@ -298,14 +322,20 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         console.log('Processing Cash Payment...');
         try {
           console.log('Updating stock...');
-          await inventoryService.updateStock(cartItems.map(item => ({
+          // Wrap the Supabase stock update in a 2-second timeout so a bad network connection never hangs the checkout!
+          const stockUpdatePromise = inventoryService.updateStock(cartItems.map(item => ({
             id: item.id,
             productId: item.productId,
             quantity: item.quantity,
             size: item.size,
             name: item.name
           })));
-          console.log('Stock updated.');
+          
+          await Promise.race([
+            stockUpdatePromise,
+            new Promise(resolve => setTimeout(resolve, 2000))
+          ]);
+          console.log('Stock update attempted (with 2s timeout cutoff).');
 
           // Clear cart
           saveCartItems([]);

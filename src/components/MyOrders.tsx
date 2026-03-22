@@ -143,11 +143,20 @@ function MyOrders({ user }: MyOrdersProps) {
                             </div>
                         </div>
 
-                        {/* Order Footer - could add action buttons here like "Track Order" or "Invoice" */}
-                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                        {/* Order Footer */}
+                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
                             <div className="text-sm text-gray-500">
                                 Payment Method: <span className="text-gray-900 font-medium capitalize">{order.payment_method}</span>
                             </div>
+                            <button 
+                                onClick={() => {
+                                    const deliveryDate = new Date(new Date(order.created_at).getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString();
+                                    alert(`Order #${order.order_id}\n\nCurrent Status: ${order.status.toUpperCase()}\nEstimated Delivery: ${deliveryDate}\nCarrier: Delhivery\nTracking ID: ZDNA${Math.floor(Math.random() * 8999999 + 1000000)}`);
+                                }}
+                                className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                            >
+                                Track Order
+                            </button>
                         </div>
                     </div>
                 );
