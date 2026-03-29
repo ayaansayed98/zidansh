@@ -293,11 +293,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           shipping_address: `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`
         });
         
-        // Wrap in a 2-second timeout to prevent the exact same Supabase network hanging!
-        await Promise.race([
-          orderPromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('DB Timeout')), 2000))
-        ]);
+        await orderPromise;
         console.log('Order saved to Supabase successfully.');
       } catch (saveError) {
         console.error('Proceeding despite order save error:', saveError);

@@ -264,27 +264,55 @@ export const orderService = {
   },
 
   async createOrder(orderData: any): Promise<any> {
-    const { data, error } = await supabase
-      .from('orders')
-      .insert(orderData)
-      .select()
-      .single();
+    try {
+      const url = new URL(`${SUPABASE_URL}/rest/v1/orders`);
+      const response = await fetch(url.toString(), {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(orderData)
+      });
 
-    if (error) {
-      console.error('Error creating order in DB:', error);
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error('Error creating order in DB:', errText);
+        throw new Error(errText);
+      }
+
+      const data = await response.json();
+      // Since 'Prefer': 'return=representation' is used, it returns an array of inserted records.
+      return data[0];
+    } catch (error) {
+      console.error('Error in createOrder:', error);
       throw error;
     }
-    return data;
   },
 
   async updateOrderStatus(orderId: string, status: string): Promise<void> {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status })
-      .eq('order_id', orderId);
+    try {
+      const url = new URL(`${SUPABASE_URL}/rest/v1/orders`);
+      url.searchParams.append('order_id', `eq.${orderId}`);
       
-    if (error) {
-      console.error('Error updating order status:', error);
+      const response = await fetch(url.toString(), {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error('Error updating order status:', errText);
+      }
+    } catch (error) {
+      console.error('Error in updateOrderStatus:', error);
     }
   }
 };
