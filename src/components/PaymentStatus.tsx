@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Package, Calendar, CreditCard, ChevronRight, Home } from 'lucide-react';
 import { inventoryService } from '../lib/inventory';
 import { loadCartItems, saveCartItems } from '../lib/storage';
 import { orderService } from '../lib/database';
@@ -11,9 +11,14 @@ const PaymentStatus: React.FC = () => {
     const [status, setStatus] = useState<'success' | 'failure' | 'loading'>('loading');
     const [processed, setProcessed] = useState(false);
 
+    const searchParams = new URLSearchParams(location.search);
+    const amount = searchParams.get('amount') || searchParams.get('total') || '0.00';
+    const orderId = searchParams.get('orderId') || searchParams.get('txnid') || 'Unknown';
+    const deliveryDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
+        weekday: 'short', month: 'long', day: 'numeric', year: 'numeric'
+    });
+
     useEffect(() => {
-        // Log all URL parameters for debugging
-        const searchParams = new URLSearchParams(location.search);
         const params: Record<string, string> = {};
         searchParams.forEach((value, key) => {
             params[key] = value;
@@ -64,12 +69,6 @@ const PaymentStatus: React.FC = () => {
                 handleSuccess();
             }
 
-            // Redirect to orders
-            const timer = setTimeout(() => {
-                navigate('/orders');
-            }, 3000);
-            return () => clearTimeout(timer);
-
         } else if (location.pathname.includes('/failure')) {
             setStatus('failure');
             const orderId = searchParams.get('orderId') || searchParams.get('txnid');
@@ -83,32 +82,58 @@ const PaymentStatus: React.FC = () => {
     }, [location, navigate, processed]);
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full transform transition-all">
                 {status === 'success' ? (
-                    <div className="space-y-4">
+                    <div className="space-y-6 text-center">
                         <div className="flex justify-center">
-                            <CheckCircle className="w-16 h-16 text-green-500" />
+                            <div className="relative">
+                                <div className="absolute -inset-1 rounded-full bg-green-100 animate-ping"></div>
+                                <CheckCircle className="relative w-24 h-24 text-green-500 bg-white rounded-full z-10" />
+                            </div>
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">Payment Successful!</h2>
-                        <p className="text-gray-600">
-                            Thank you for your purchase. Your order has been placed successfully.
-                        </p>
-                        <p className="text-sm text-gray-500">
-                            Redirecting to your orders...
-                        </p>
-                        <div className="pt-6 space-y-3">
+                        
+                        <div>
+                            <h2 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Payment Successful!</h2>
+                            <p className="text-gray-500">
+                                Thank you for your purchase. We are preparing your order.
+                            </p>
+                        </div>
+                        
+                        <div className="bg-gray-50 rounded-xl p-5 mt-6 border border-gray-100 text-left space-y-4 shadow-sm">
+                            <h3 className="font-semibold text-gray-900 border-b pb-2 mb-2 flex items-center gap-2">
+                                <Package className="w-5 h-5 text-pink-600" />
+                                Order Details
+                            </h3>
+                            
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-gray-500">Order ID:</span>
+                                <span className="font-medium font-mono bg-white px-2 py-1 rounded shadow-sm text-gray-800">{orderId}</span>
+                            </div>
+                            
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-gray-500 flex items-center gap-1"><CreditCard className="w-4 h-4"/> Amount Paid:</span>
+                                <span className="font-bold text-gray-900 text-lg">₹{amount}</span>
+                            </div>
+
+                            <div className="flex justify-between items-center text-sm bg-blue-50 -mx-5 -mb-5 p-5 rounded-b-xl border-t border-blue-100 mt-4">
+                                <span className="text-blue-800 flex items-center gap-1 font-medium"><Calendar className="w-4 h-4" /> Expected Delivery:</span>
+                                <span className="font-bold text-blue-900 text-right">{deliveryDate}</span>
+                            </div>
+                        </div>
+
+                        <div className="pt-6 space-y-3 flex flex-col sm:flex-row sm:space-y-0 sm:gap-3">
                             <Link
-                                to="/profile"
-                                className="block w-full py-3 px-4 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
+                                to="/orders"
+                                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-black text-white font-medium rounded-xl hover:bg-gray-900 hover:shadow-lg transition-all focus:ring-2 focus:ring-offset-2 focus:ring-black"
                             >
-                                View Orders Now
+                                Track Order <ChevronRight className="w-4 h-4" />
                             </Link>
                             <Link
                                 to="/"
-                                className="block w-full py-3 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-white border-2 border-gray-200 text-gray-800 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
                             >
-                                Continue Shopping
+                                <Home className="w-4 h-4" /> Home
                             </Link>
                         </div>
                     </div>

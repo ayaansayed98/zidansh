@@ -195,8 +195,8 @@ class PaymentService {
         // Define success and failure URLs
         // These must point to your BACKEND server which handles the POST callback
         const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-        const surl = `${backendUrl}/payment/success`;
-        const furl = `${backendUrl}/payment/failure`;
+        const surl = `${backendUrl}/api/payment/success`;
+        const furl = `${backendUrl}/api/payment/failure`;
 
         const hash = await this.generateHash({
           txnid,

@@ -126,7 +126,7 @@ app.post('/api/send-email-otp', async (req, res) => {
 app.use(express.urlencoded({ extended: true })); // Handle form data from PayU
 
 // PayU Callback Routes
-app.post('/payment/success', (req, res) => {
+app.post('/api/payment/success', (req, res) => {
   console.log('✅ PayU Success Callback:', req.body);
   const params = new URLSearchParams(req.body).toString();
   // Redirect to frontend with params
@@ -134,7 +134,7 @@ app.post('/payment/success', (req, res) => {
   res.redirect(`${frontendUrl}/payment/success?${params}`);
 });
 
-app.post('/payment/failure', (req, res) => {
+app.post('/api/payment/failure', (req, res) => {
   console.log('❌ PayU Failure Callback:', req.body);
   const params = new URLSearchParams(req.body).toString();
   const frontendUrl = process.env.VITE_FRONTEND_URL || 'http://localhost:5173';
