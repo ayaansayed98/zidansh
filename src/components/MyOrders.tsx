@@ -13,11 +13,22 @@ function MyOrders({ user }: MyOrdersProps) {
 
     useEffect(() => {
         const fetchOrders = async () => {
-            if (!user?.email) return;
+            if (!user) {
+                setLoading(false);
+                return;
+            }
+            
+            const identifier = user?.email || user?.phone || user?.user_metadata?.email;
+            
+            if (!identifier) {
+                console.log('No user email/phone found to fetch orders');
+                setLoading(false);
+                return;
+            }
 
             try {
                 setLoading(true);
-                const data = await orderService.getUserOrders(user.email);
+                const data = await orderService.getUserOrders(identifier);
                 setOrders(data);
             } catch (err) {
                 console.error('Error fetching orders:', err);

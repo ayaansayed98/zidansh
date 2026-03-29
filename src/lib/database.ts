@@ -225,23 +225,32 @@ export const bulkOrderService = {
 
 // Order Service
 export const orderService = {
-  async getUserOrders(email: string): Promise<any[]> {
+  async getUserOrders(identifier: string): Promise<any[]> {
     try {
-      const { data: user } = await supabase
+      const isPhone = /^[0-9+\s\-()]+$/.test(identifier) && identifier.length >= 10;
+      
+      const { data: dbUser } = await supabase
         .from('users')
-        .select('phone_number')
-        .eq('email_address', email)
-        .single();
+        .select('phone_number, email_address')
+        .or(`email_address.eq.${identifier},phone_number.eq.${identifier}`)
+        .maybeSingle();
 
       let query = supabase
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (user?.phone_number) {
-        query = query.or(`customer_email.eq.${email},customer_phone.eq.${user.phone_number}`);
+      const emailToSearch = dbUser?.email_address || (!isPhone ? identifier : null);
+      const phoneToSearch = dbUser?.phone_number || (isPhone ? identifier : null);
+
+      if (emailToSearch && phoneToSearch) {
+        query = query.or(`customer_email.eq.${emailToSearch},customer_phone.eq.${phoneToSearch}`);
+      } else if (emailToSearch) {
+        query = query.eq('customer_email', emailToSearch);
+      } else if (phoneToSearch) {
+        query = query.eq('customer_phone', phoneToSearch);
       } else {
-        query = query.eq('customer_email', email);
+        return []; // No valid identifier to search with
       }
 
       const { data, error } = await query;
