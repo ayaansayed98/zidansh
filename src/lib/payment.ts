@@ -1,7 +1,7 @@
 // Payment Service for Real-time Payment Integration
 // Supports Razorpay, UPI, Cards, and other payment methods
 
-import { CreditCard, Smartphone, Wallet } from 'lucide-react';
+import { CreditCard, Smartphone } from 'lucide-react';
 
 export interface PaymentData {
   amount: number;
@@ -52,13 +52,15 @@ export const quickPaymentMethods: QuickPaymentMethod[] = [
     name: 'Card',
     icon: CreditCard,
     description: 'Credit/Debit cards'
-  },
+  }
+  /*
   {
     id: 'cash',
     name: 'Cash',
     icon: Wallet,
     description: 'Cash on delivery'
   }
+  */
 ];
 
 // Popular UPI Apps
