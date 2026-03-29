@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase';
 import { Customer, NewCustomer } from '../types/customer';
 import { User, NewUser, SignInAttempt, OrderTrackingRequest } from '../types/user';
 import { NewsletterSubscription, NewNewsletterSubscription } from '../types/newsletter';
@@ -230,26 +230,32 @@ export const orderService = {
       console.log('Directly querying orders table with strict matching on identifier:', identifier);
       
       const isPhone = /^[0-9+\s\-()]+$/.test(identifier) && identifier.length >= 10;
+      const column = isPhone ? 'customer_phone' : 'customer_email';
       
-      let query = supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // We use a raw fetch request here because the Supabase JS client could hang 
+      // indefinitely if the user's local auth session state is stuck refreshing a bad token
+      // in the background. MyOrders doesn't need auth state; it matches by email/phone.
+      const url = new URL(`${SUPABASE_URL}/rest/v1/orders`);
+      url.searchParams.append(column, `eq.${identifier}`);
+      url.searchParams.append('order', 'created_at.desc');
+      
+      console.log('Sending optimized fetch query to:', url.toString());
+      const response = await fetch(url.toString(), {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      });
 
-      if (isPhone) {
-        query = query.eq('customer_phone', identifier);
-      } else {
-        query = query.eq('customer_email', identifier);
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error('Order fetching database error:', errText);
+        throw new Error(errText);
       }
-
-      console.log('Sending optimized query...');
-      const { data, error } = await query;
+      
+      const data = await response.json();
       console.log('Optimized query results length:', data?.length);
       
-      if (error) {
-        console.error('Order fetching database error:', error);
-        throw error;
-      }
       return data || [];
     } catch (error) {
       console.error('Error in getUserOrders:', error);

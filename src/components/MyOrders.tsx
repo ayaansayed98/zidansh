@@ -29,13 +29,7 @@ function MyOrders({ user }: MyOrdersProps) {
             try {
                 setLoading(true);
                 
-                // Add a hard timeout to prove if Supabase is secretly hanging
-                const fetchPromise = orderService.getUserOrders(identifier);
-                const timeoutPromise = new Promise<any[]>((_, reject) => 
-                    setTimeout(() => reject(new Error("Supabase query took too long (8s timeout)")), 8000)
-                );
-                
-                const data = await Promise.race([fetchPromise, timeoutPromise]);
+                const data = await orderService.getUserOrders(identifier);
                 setOrders(data);
                 
             } catch (err: any) {

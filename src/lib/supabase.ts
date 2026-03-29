@@ -19,4 +19,6 @@ console.log('DEBUG SUPABASE:', {
     env: import.meta.env.MODE
 });
 
+export const SUPABASE_URL = supabaseUrl;
+export const SUPABASE_ANON_KEY = supabaseAnonKey;
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
