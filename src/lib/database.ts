@@ -227,34 +227,29 @@ export const bulkOrderService = {
 export const orderService = {
   async getUserOrders(identifier: string): Promise<any[]> {
     try {
+      console.log('Directly querying orders table with strict matching on identifier:', identifier);
+      
       const isPhone = /^[0-9+\s\-()]+$/.test(identifier) && identifier.length >= 10;
       
-      const { data: dbUser } = await supabase
-        .from('users')
-        .select('phone_number, email_address')
-        .or(`email_address.eq.${identifier},phone_number.eq.${identifier}`)
-        .maybeSingle();
-
       let query = supabase
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false });
 
-      const emailToSearch = dbUser?.email_address || (!isPhone ? identifier : null);
-      const phoneToSearch = dbUser?.phone_number || (isPhone ? identifier : null);
-
-      if (emailToSearch && phoneToSearch) {
-        query = query.or(`customer_email.eq.${emailToSearch},customer_phone.eq.${phoneToSearch}`);
-      } else if (emailToSearch) {
-        query = query.eq('customer_email', emailToSearch);
-      } else if (phoneToSearch) {
-        query = query.eq('customer_phone', phoneToSearch);
+      if (isPhone) {
+        query = query.eq('customer_phone', identifier);
       } else {
-        return []; // No valid identifier to search with
+        query = query.eq('customer_email', identifier);
       }
 
+      console.log('Sending optimized query...');
       const { data, error } = await query;
-      if (error) throw error;
+      console.log('Optimized query results length:', data?.length);
+      
+      if (error) {
+        console.error('Order fetching database error:', error);
+        throw error;
+      }
       return data || [];
     } catch (error) {
       console.error('Error in getUserOrders:', error);
