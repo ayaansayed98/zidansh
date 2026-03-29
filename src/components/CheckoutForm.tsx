@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Info, Mail, Phone, X, CreditCard, Banknote } from 'lucide-react';
+import { Trash2, Info, Mail, Phone, X, CreditCard /* , Banknote */ } from 'lucide-react';
 import { analyticsService } from '../lib/analytics';
 import { inventoryService } from '../lib/inventory';
 import { saveCartItems } from '../lib/storage';
@@ -139,7 +139,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     additionalNotes: ''
   });
 
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('online');
   const [couponCode, setCouponCode] = useState<string>('');
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string, discount: number } | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -152,14 +152,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
   const quickPaymentMethods = [
     { id: 'online', name: 'Online Payment', description: 'Cards, UPI, NetBanking', icon: CreditCard },
-    { id: 'cash', name: 'Cash', description: 'On Delivery', icon: Banknote }
+    // { id: 'cash', name: 'Cash', description: 'On Delivery', icon: Banknote }
   ];
 
   const orderCalculations = useMemo(() => {
     const subtotal = totalAmount ?? cartItems.reduce((sum: number, item: CartItem) =>
       sum + (item.price * (item.quantity || 1)), 0);
 
-    const delivery = subtotal > 1000 ? 0 : 50;
+    // const delivery = subtotal > 1000 ? 0 : 50;
+    const delivery = 0;
     const cash = selectedPaymentMethod === 'cash' ? 50 : 0;
     const discountAmount = appliedCoupon ? (appliedCoupon.discount / 100) * subtotal : 0;
     const total = subtotal + delivery + cash - discountAmount;
