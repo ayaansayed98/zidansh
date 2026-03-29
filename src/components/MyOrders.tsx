@@ -28,11 +28,19 @@ function MyOrders({ user }: MyOrdersProps) {
 
             try {
                 setLoading(true);
-                const data = await orderService.getUserOrders(identifier);
+                
+                // Add a hard timeout to prove if Supabase is secretly hanging
+                const fetchPromise = orderService.getUserOrders(identifier);
+                const timeoutPromise = new Promise<any[]>((_, reject) => 
+                    setTimeout(() => reject(new Error("Supabase query took too long (8s timeout)")), 8000)
+                );
+                
+                const data = await Promise.race([fetchPromise, timeoutPromise]);
                 setOrders(data);
-            } catch (err) {
+                
+            } catch (err: any) {
                 console.error('Error fetching orders:', err);
-                setError('Failed to load orders. Please try again later.');
+                setError(err.message || 'Failed to load orders. Please try again later.');
             } finally {
                 setLoading(false);
             }
