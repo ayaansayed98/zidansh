@@ -286,6 +286,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           customer_name: formData.customerName,
           customer_email: formData.customerEmail,
           customer_phone: formData.customerPhone,
+          
+          // Schema NOT NULL columns
+          total_amount: orderCalculations.total,
+          order_items: cartItems,
+          customer_address: `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
+          payment_status: 'pending',
+          order_status: 'processing',
+          
+          // Legacy/Added columns
           amount: orderCalculations.total,
           status: selectedPaymentMethod === 'cash' ? 'processing' : 'pending',
           items: cartItems,

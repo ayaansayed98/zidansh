@@ -97,8 +97,10 @@ function MyOrders({ user }: MyOrdersProps) {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">My Orders</h2>
 
             {orders.map((order) => {
-                const StatusIcon = getStatusIcon(order.status);
-                const items = order.items || []; // items are stored as JSONB
+                const orderStatus = order.status || order.order_status || 'processing';
+                const StatusIcon = getStatusIcon(orderStatus);
+                const items = order.items || order.order_items || []; // items are stored as JSONB
+                const orderAmount = order.amount || order.total_amount || 0;
 
                 return (
                     <div key={order.id} className="bg-white border text-left border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -112,15 +114,15 @@ function MyOrders({ user }: MyOrdersProps) {
                             </div>
                             <div className="space-y-1">
                                 <p className="text-sm text-gray-500">Total Amount</p>
-                                <p className="font-medium text-gray-900">₹{order.amount}</p>
+                                <p className="font-medium text-gray-900">₹{orderAmount}</p>
                             </div>
                             <div className="space-y-1">
                                 <p className="text-sm text-gray-500">Order ID</p>
                                 <p className="font-medium text-gray-900">#{order.order_id}</p>
                             </div>
-                            <div className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${getStatusColor(order.status)}`}>
+                            <div className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${getStatusColor(orderStatus)}`}>
                                 <StatusIcon className="w-4 h-4" />
-                                <span className="capitalize">{order.status}</span>
+                                <span className="capitalize">{orderStatus}</span>
                             </div>
                         </div>
 
@@ -159,7 +161,7 @@ function MyOrders({ user }: MyOrdersProps) {
                         {/* Order Footer */}
                         <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
                             <div className="text-sm text-gray-500">
-                                Payment Method: <span className="text-gray-900 font-medium capitalize">{order.payment_method}</span>
+                                Payment Method: <span className="text-gray-900 font-medium capitalize">{order.payment_method || 'Online'}</span>
                             </div>
                             <button 
                                 onClick={() => {

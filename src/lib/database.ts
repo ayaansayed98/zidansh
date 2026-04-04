@@ -297,6 +297,19 @@ export const orderService = {
       const url = new URL(`${SUPABASE_URL}/rest/v1/orders`);
       url.searchParams.append('order_id', `eq.${orderId}`);
       
+      let payment_status = 'pending';
+      let order_status = 'processing';
+
+      if (status === 'processing' || status === 'completed' || status === 'success') {
+          payment_status = 'completed';
+          order_status = 'processing';
+          status = 'processing'; // normalize for the frontend legacy column
+      } else if (status === 'cancelled' || status === 'failed') {
+          payment_status = 'failed';
+          order_status = 'cancelled';
+          status = 'cancelled'; // normalize for legacy frontend column
+      }
+
       const response = await fetch(url.toString(), {
         method: 'PATCH',
         headers: {
@@ -304,7 +317,7 @@ export const orderService = {
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status, payment_status, order_status })
       });
 
       if (!response.ok) {
