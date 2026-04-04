@@ -9,7 +9,7 @@ CREATE TABLE orders (
   order_items JSONB NOT NULL, -- Store cart items as JSON
   total_amount DECIMAL(10,2) NOT NULL,
   payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
-  order_status TEXT DEFAULT 'processing' CHECK (order_status IN ('processing', 'shipped', 'delivered', 'cancelled')),
+  order_status TEXT DEFAULT 'pending' CHECK (order_status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled')),
   tracking_link TEXT, -- Manually entered by admin after getting from delivery partner
   tracking_updated_at TIMESTAMP WITH TIME ZONE,
   tracking_updated_by TEXT, -- Admin who updated the tracking

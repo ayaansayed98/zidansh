@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Clock, CheckCircle, Truck, XCircle, Package } from 'lucide-react';
 import { orderService } from '../lib/database';
+import { paymentService } from '../lib/payment';
 
 interface MyOrdersProps {
     user: any;
@@ -73,12 +74,17 @@ function MyOrders({ user }: MyOrdersProps) {
     }
 
     const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'processing': return 'text-blue-600 bg-blue-50';
-            case 'shipped': return 'text-purple-600 bg-purple-50';
-            case 'delivered': return 'text-green-600 bg-green-50';
-            case 'cancelled': return 'text-red-600 bg-red-50';
-            default: return 'text-yellow-600 bg-yellow-50';
+        switch (status.toLowerCase()) {
+            case 'processing':
+            case 'shipped':
+            case 'delivered':
+                return 'text-green-600 bg-green-50';
+            case 'cancelled':
+                return 'text-red-600 bg-red-50';
+            case 'pending':
+                return 'text-yellow-600 bg-yellow-50';
+            default:
+                return 'text-gray-600 bg-gray-50';
         }
     };
 
@@ -97,8 +103,20 @@ function MyOrders({ user }: MyOrdersProps) {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">My Orders</h2>
 
             {orders.map((order) => {
-                const orderStatus = order.status || order.order_status || 'processing';
-                const StatusIcon = getStatusIcon(orderStatus);
+                const paymentStatus = order.payment_status || 'pending';
+                const paymentMethod = order.payment_method || 'online';
+                
+                // Determine the true display status
+                let displayStatus = order.order_status || order.status || 'processing';
+                
+                // If the payment is strictly pending for an online payment, show pending
+                if (paymentStatus === 'pending' && paymentMethod !== 'cash') {
+                    displayStatus = 'pending';
+                } else if (paymentStatus === 'failed' || displayStatus === 'cancelled') {
+                    displayStatus = 'cancelled';
+                }
+
+                const StatusIcon = getStatusIcon(displayStatus);
                 const items = order.items || order.order_items || []; // items are stored as JSONB
                 const orderAmount = order.amount || order.total_amount || 0;
 
@@ -120,9 +138,9 @@ function MyOrders({ user }: MyOrdersProps) {
                                 <p className="text-sm text-gray-500">Order ID</p>
                                 <p className="font-medium text-gray-900">#{order.order_id}</p>
                             </div>
-                            <div className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${getStatusColor(orderStatus)}`}>
+                            <div className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${getStatusColor(displayStatus)}`}>
                                 <StatusIcon className="w-4 h-4" />
-                                <span className="capitalize">{orderStatus}</span>
+                                <span className="capitalize">{displayStatus}</span>
                             </div>
                         </div>
 
@@ -161,17 +179,45 @@ function MyOrders({ user }: MyOrdersProps) {
                         {/* Order Footer */}
                         <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
                             <div className="text-sm text-gray-500">
-                                Payment Method: <span className="text-gray-900 font-medium capitalize">{order.payment_method || 'Online'}</span>
+                                Payment Method: <span className="text-gray-900 font-medium capitalize">{paymentMethod}</span>
                             </div>
-                            <button 
-                                onClick={() => {
-                                    const deliveryDate = new Date(new Date(order.created_at).getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString();
-                                    alert(`Order #${order.order_id}\n\nCurrent Status: ${order.status.toUpperCase()}\nEstimated Delivery: ${deliveryDate}\nCarrier: Delhivery\nTracking ID: ZDNA${Math.floor(Math.random() * 8999999 + 1000000)}`);
-                                }}
-                                className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                            >
-                                Track Order
-                            </button>
+                            
+                            {displayStatus === 'pending' ? (
+                                <button 
+                                    onClick={async () => {
+                                        try {
+                                            const result = await paymentService.processPayment({
+                                                amount: orderAmount,
+                                                currency: 'INR',
+                                                customerName: order.customer_name || user?.user_metadata?.full_name || 'Customer',
+                                                customerEmail: order.customer_email || user?.email || '',
+                                                customerPhone: order.customer_phone || user?.phone || '9999999999',
+                                                orderId: order.order_id,
+                                                description: `Order ${order.order_id}`,
+                                                paymentMethod: paymentMethod
+                                            });
+                                            if (!result.success) {
+                                                alert(result.error || 'Payment initialization failed. Ensure server.js is running.');
+                                            }
+                                        } catch (e: any) {
+                                            alert(e.message || 'Error processing payment');
+                                        }
+                                    }}
+                                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                                >
+                                    Complete Payment
+                                </button>
+                            ) : (
+                                <button 
+                                    onClick={() => {
+                                        const deliveryDate = new Date(new Date(order.created_at).getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString();
+                                        alert(`Order #${order.order_id}\n\nCurrent Status: ${displayStatus.toUpperCase()}\nEstimated Delivery: ${deliveryDate}\nCarrier: Delhivery\nTracking ID: ZDNA${Math.floor(Math.random() * 8999999 + 1000000)}`);
+                                    }}
+                                    className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                                >
+                                    Track Order
+                                </button>
+                            )}
                         </div>
                     </div>
                 );
