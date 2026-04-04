@@ -210,8 +210,8 @@ function MyOrders({ user }: MyOrdersProps) {
                             ) : (
                                 <button 
                                     onClick={() => {
-                                        const deliveryDate = new Date(new Date(order.created_at).getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString();
-                                        alert(`Order #${order.order_id}\n\nCurrent Status: ${displayStatus.toUpperCase()}\nEstimated Delivery: ${deliveryDate}\nCarrier: Delhivery\nTracking ID: ZDNA${Math.floor(Math.random() * 8999999 + 1000000)}`);
+                                        const deliveryDate = new Date(new Date(order.created_at).getTime() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString();
+                                        alert(`Order #${order.order_id}\n\nCurrent Status: ${displayStatus.toUpperCase()}\nEstimated Delivery: ${deliveryDate} (10 Working Days)\nCarrier: Skyking\nTracking ID: ZDNA${Math.floor(Math.random() * 8999999 + 1000000)}`);
                                     }}
                                     className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                                 >
